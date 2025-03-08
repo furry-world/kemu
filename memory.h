@@ -1,20 +1,23 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-struct ROM
-{
-    static constexpr unsigned int MAX_ROM = 4096;
-    unsigned char ROM[MAX_ROM];
-    void Initialize();
-    unsigned char& operator[](unsigned int);
-};
+#include <cstdint>
+#include <vector>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
 
-struct RAM
+
+struct Memory
 {
-    static constexpr unsigned int MAX_RAM = 256;
-    unsigned char RAM[MAX_RAM];
-    void Initialize();
-    unsigned char& operator[](unsigned int);
+    Memory(unsigned int);
+    void Initialize(unsigned char);
+    std::vector<uint8_t> Mem;
+    uint8_t& operator[](uint32_t);
+    void LoadFile(char const*);
+
+private:   
+    uint32_t MAX_MEM;
 };
 
 #endif

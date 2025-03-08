@@ -1,138 +1,366 @@
-#include <cstdio>
 #include "cpu.h"
 
-void CPU::Reset(RAM& ram, ROM& rom){
+void CPU::Reset(Memory& ram, Memory& rom){
     PC = 0;
     SP = 0;
-    A = B = C = D = E = F = G = 0;
-    H = false;
-    ram.Initialize();
-    rom.Initialize();
+
+    ram.Initialize(0);
+    rom.Initialize(63);
+
+    cyclesToExecute = 0;
 }
 
-unsigned char CPU::FetchByte (unsigned int& Cycles, ROM& memory)
+uint8_t CPU::FetchByte (int& Cycles, Memory& memory)
 {
-    unsigned char Data = memory[PC];
+    uint8_t Data = memory[PC];
     PC++;
     Cycles--;
     return Data;
 }
 
-unsigned char CPU::FetchByteRAM (unsigned int& Cycles, RAM& memory, unsigned char address)
+uint8_t CPU::FetchByteRAM (int& Cycles, Memory& memory, uint8_t address)
 {
+    uint8_t Data = memory[address];
     Cycles--;
-    return memory[address];
+    return Data;
 }
 
-void CPU::Execute (unsigned int Cycles, ROM& memory, RAM& ram)
+void CPU::StoreByteRAM (int& Cycles, Memory& memory, uint8_t address, uint8_t value)
 {
-    while (Cycles > 0)
+    Cycles--;
+    memory[address] = value;
+}
+
+void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
+{
+    cyclesToExecute += Cycles;
+
+    while (cyclesToExecute > 0)
     {
-        unsigned char Ins = CPU::FetchByte(Cycles, memory);
+
+        uint8_t Ins = CPU::FetchByte(cyclesToExecute, rom);
+        // printf("Operation: %d\n", Ins);
         switch(Ins)
         {
+            case INS_CALL:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+                
+                uint16_t Adsr = 0;
+                Adsr += value1;
+                Adsr = (Adsr << 6)  + value2;
+
+                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP, value1);
+                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP + 1, value2);
+
+                if (SP < 14)
+                {
+                    SP++;    
+                }
+                else
+                {
+                    exit(0);
+                }
+
+                PC = (value1 << 6) + value2;
+
+                cyclesToExecute--;
+
+            } break;
+
+            case INS_RET:
+            {
+                uint8_t Value1 = CPU::FetchByteRAM(cyclesToExecute, ram, 240 + SP);
+                uint8_t Value2 = CPU::FetchByteRAM(cyclesToExecute, ram, 240 + SP + 1);
+
+                PC = (Value1 << 6) + Value2;
+
+                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP, 0);
+                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP + 1, 0);
+
+                SP--;
+
+                cyclesToExecute--;
+
+            } break;
+
+            case INS_JMP:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                uint16_t Adsr = 0;
+                Adsr += value1;
+                Adsr = (Adsr << 6)  + value2;
+
+                PC = (value1 << 6) + value2;
+
+                cyclesToExecute -= 3;
+            } break;
+
+            case INS_EQU:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                if ((value1 & 0b00000100) >> 2 == 0)
+                {
+                    if (Registers[(value1 & 0b00111000) >> 3] == value2 & 0b00111111)
+                    {
+                        uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
+                        PC += WordLen[In]-1;
+                        cyclesToExecute -= WordLen[In];
+                    }
+                }
+                else
+                {
+                    if (Registers[(value1 & 0b00111000) >> 3] == CPU::FetchByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2))
+                    {
+                        uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
+                        PC += WordLen[In]-1;
+                        cyclesToExecute -= WordLen[In];
+                    }
+                }
+                cyclesToExecute--;
+            } break;
+
+            case INS_NEQU:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                if ((value1 & 0b00000100) >> 2 == 0)
+                {
+                    if (Registers[(value1 & 0b00111000) >> 3] != value2 & 0b00111111 )
+                    {
+                        uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
+                        PC += WordLen[In];
+                        cyclesToExecute -= WordLen[In];
+                    }
+                }
+                else
+                {
+                    if (Registers[(value1 & 0b00111000) >> 3] != CPU::FetchByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2))
+                    {
+                        uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
+                        PC += WordLen[In];
+                        cyclesToExecute -= WordLen[In];
+                    }
+                }
+                cyclesToExecute--;
+            } break;
+
+            case INS_RJMP:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                PC += value1 & 0b11000000;
+
+                cyclesToExecute -= 2;
+            } break;
+
+            case INS_ADD:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                if (Registers[(value1 & 0b00111000) >> 3] != 7)
+                {
+                    Registers[(value1 & 0b00111000) >> 3] += Registers[(value1 & 0b00000111)];
+
+                }
+                else
+                {
+                    Registers[(value1 & 0b00111000) >> 3] += Registers[(value1 & 0b00000111)] & 0b00000001;
+                }
+
+                if (Registers[(value1 & 0b00111000) >> 3] > 0b00111111)
+                {
+                    Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] & 0b00111111;
+                    Registers[7] = 1;
+                }
+                else
+                {
+                    Registers[7] = 0;
+                }
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_SUB:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                if (Registers[(value1 & 0b00111000) >> 3] != 7)
+                {
+                    Registers[(value1 & 0b00111000) >> 3] -= Registers[(value1 & 0b00000111)];
+
+                }
+                else
+                {
+                    Registers[(value1 & 0b00111000) >> 3] -= Registers[(value1 & 0b00000111)] & 0b00000001;
+                }
+
+                if (Registers[(value1 & 0b00111000) >> 3] > 0b00111111)
+                {
+                    Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] & 0b00111111;
+                    Registers[7] = 1;
+                }
+                else
+                {
+                    Registers[7] = 0;
+                }
+
+                cyclesToExecute--;
+            } break;
+            
             case INS_LOAD:
             {
-                unsigned char value1 = CPU::FetchByte(Cycles, memory);
-                unsigned char value2 = CPU::FetchByte(Cycles, memory);
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
 
-                switch( ((value1 & 0b00111000) >> 3) )
+                if ((value1 & 0b00000100) >> 2 == 0)
                 {
-                    case 0:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            A = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            A = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 1:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            B = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            B = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 2:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            C = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            C = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 3:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            D = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            D = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 4:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            E = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            E = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 5:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            F = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            F = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 6:
-                        if ((value1 & 0b00000100) >> 2 == 0)
-                        {
-                            G = value2 & 0b00111111;
-                        }
-                        else
-                        {
-                            G = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00111111;
-                        }
-                        break;
-
-                    case 7:
-                        if ((value1 & 0b00000100) >> 2== 0)
-                        {
-                            H = value2 & 0b00000001;
-                        }
-                        else
-                        {
-                            H = (CPU::FetchByteRAM(Cycles, ram, ((value1 & 0b00000011) << 6) + value2)) & 0b00000001;
-                        }
-                        break;
-                    
-                    default:
-                            printf("instruction not handled %d\n", Ins);
-                            break;
+                    if ((value1 & 0b00111000) >> 3 != 7)
+                    {
+                        Registers[(value1 & 0b00111000) >> 3] = value2 & 0b00111111;
+                    }
+                    else
+                    {
+                        Registers[(value1 & 0b00111000) >> 3] = value2 & 0b00000001;
+                    }
                 }
-                Cycles--;
+                else
+                {
+                    if ((value1 & 0b00111000) >> 3 != 7)
+                    {
+                        Registers[(value1 & 0b00111000) >> 3] = CPU::FetchByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2);
+                    }
+                    else
+                    {
+                        Registers[(value1 & 0b00111000) >> 3] = CPU::FetchByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2) & 0b00000001;
+                    }
+                }
+                cyclesToExecute--;
+                break;
+            }
+            case INS_STORE:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                StoreByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2, Registers[(value1 & 0b00111000) >> 3]);
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_RLOAD:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[value1 & 0b00000111];
+
+                cyclesToExecute--;
             }
 
+            case INS_REQU:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                if (Registers[(value1 & 0b00111000) >> 3] == Registers[value1 & 0b00000111])
+                {
+                    uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
+                    PC += WordLen[In]-1;
+                    cyclesToExecute -= WordLen[In];
+                }
+                cyclesToExecute--;
+            } break;
+
+            case INS_NREQU:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+                if (Registers[(value1 & 0b00111000) >> 3] != Registers[value1 & 0b00000111])
+                {
+                    uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
+                    PC += WordLen[In];
+                    cyclesToExecute -= WordLen[In];
+                }
+                cyclesToExecute--;
+            } break;
+
+            case INS_OR:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] | Registers[value1 & 0b00000111];
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_AND:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] & Registers[value1 & 0b00000111];
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_XOR:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] ^ Registers[value1 & 0b00000111];
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_SHIFTL:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] << Registers[7];
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_SHIFTR:
+            {
+                uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] >> Registers[7];
+
+                cyclesToExecute--;
+            } break;
+            default:
+            {
+                if ((Ins & 0b00111000) >> 3 == 4)
+                {
+                    uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                    uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                    Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (value1 >> 6) + value2);
+
+                    cyclesToExecute--;
+                }
+                else if ((Ins & 0b00111000) >> 3 == 5)
+                {
+                    uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
+                    uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
+
+                    rom[(value1 >> 6) + value2] = Registers[Ins & 0b00000111];
+
+                    cyclesToExecute -= 2;
+                }
+                else
+                {
+                    printf("instruction not handled %u at PC address %u\n", Ins, PC);
+                    exit(0);
+                }
+            }
         }
+        printf("A: %d | B: %d | C: %d | D: %d | E: %d | F: %d | G: %d | H: %d\n", Registers[0], Registers[1], Registers[2], Registers[3], Registers[4], Registers[5], Registers[6], Registers[7]);
     }
 }

@@ -1,27 +1,43 @@
 #include "memory.h"
 
-void ROM::Initialize()
+Memory::Memory(unsigned int Count)
 {
-    for (unsigned int i = 0; i < MAX_ROM; i++)
+    Memory::MAX_MEM = Count;
+    Mem.reserve(Memory::MAX_MEM);
+}
+
+void Memory::Initialize(unsigned char Value)
+{
+    for (int i = 0; i < Memory::MAX_MEM; i++)
     {
-        ROM[i] = 0;
+        Mem[i] = Value;
     }
 }
 
-unsigned char& ROM::operator[](unsigned int Address)
+uint8_t& Memory::operator[](uint32_t Address)
 {
-    return ROM[Address];
+    return Mem[Address];
 }
 
-void RAM::Initialize()
+void Memory::LoadFile(char const* FileName)
 {
-    for (unsigned int i = 0; i < MAX_RAM; i++)
+	std::ifstream file(FileName, std::ios::binary | std::ios::ate);
+
+    if (file.is_open())
     {
-        RAM[i] = 0;
-    }
-}
+        std::streampos size = file.tellg();
+		char* buffer = new char[size];
+		file.seekg(0, std::ios::beg);
+		file.read(buffer, size);
+		file.close();
 
-unsigned char& RAM::operator[](unsigned int Address)
-{
-    return RAM[Address];
+        for (long i = 0; i < size; ++i)
+		{
+			Mem[i] = buffer[i];
+		}
+
+
+		delete[] buffer;
+
+    }
 }
