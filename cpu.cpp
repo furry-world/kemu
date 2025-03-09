@@ -1,11 +1,12 @@
 #include "cpu.h"
 
-void CPU::Reset(Memory& ram, Memory& rom){
+void CPU::Reset(Memory& ram, Memory& rom, Video& video){
     PC = 0;
     SP = 0;
 
     ram.Initialize(0);
     rom.Initialize(63);
+    video.Initialize();
 
     cyclesToExecute = 0;
 }
@@ -31,7 +32,7 @@ void CPU::StoreByteRAM (int& Cycles, Memory& memory, uint8_t address, uint8_t va
     memory[address] = value;
 }
 
-void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
+void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
 {
     cyclesToExecute += Cycles;
 
@@ -51,8 +52,8 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
                 Adsr += value1;
                 Adsr = (Adsr << 6)  + value2;
 
-                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP, value1);
-                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP + 1, value2);
+                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP, PC & 0b0000000000111111);
+                CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP + 1, (PC & 0b0000111111000000) >> 6);
 
                 if (SP < 14)
                 {
@@ -79,7 +80,14 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
                 CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP, 0);
                 CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP + 1, 0);
 
-                SP--;
+                if (SP > 0)
+                {
+                    SP--;    
+                }
+                else
+                {
+                    exit(0);
+                }
 
                 cyclesToExecute--;
 
@@ -157,7 +165,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
 
                 PC += value1 & 0b11000000;
 
-                cyclesToExecute -= 2;
+                cyclesToExecute--;
             } break;
 
             case INS_ADD:
@@ -241,6 +249,12 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
                         Registers[(value1 & 0b00111000) >> 3] = CPU::FetchByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2) & 0b00000001;
                     }
                 }
+
+                if ((value1 & 0b00111000) >> 3 == 6)
+                {
+                    video.flag = 1;
+                } 
+
                 cyclesToExecute--;
                 break;
             }
@@ -260,13 +274,17 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
 
                 Registers[(value1 & 0b00111000) >> 3] = Registers[value1 & 0b00000111];
 
+                if (Registers[(value1 & 0b00111000) >> 3] == 6)
+                {
+                    video.flag = 1;
+                } 
+
                 cyclesToExecute--;
             }
 
             case INS_REQU:
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
-                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
 
                 if (Registers[(value1 & 0b00111000) >> 3] == Registers[value1 & 0b00000111])
                 {
@@ -280,7 +298,6 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
             case INS_NREQU:
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
-                uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
                 if (Registers[(value1 & 0b00111000) >> 3] != Registers[value1 & 0b00000111])
                 {
                     uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
@@ -361,6 +378,13 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram)
                 }
             }
         }
+
+        if (video.flag == 1)
+        {
+            video.Apply(Registers[4], Registers[5], Registers[3]);
+            video.flag = 0;
+        }
+
         printf("A: %d | B: %d | C: %d | D: %d | E: %d | F: %d | G: %d | H: %d\n", Registers[0], Registers[1], Registers[2], Registers[3], Registers[4], Registers[5], Registers[6], Registers[7]);
     }
 }

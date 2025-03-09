@@ -26,6 +26,11 @@ void Memory::LoadFile(char const* FileName)
     if (file.is_open())
     {
         std::streampos size = file.tellg();
+        if (size > Memory::MAX_MEM)
+        {
+            printf("Error! ROM size exceeds limit!\n");
+            exit(0);
+        }
 		char* buffer = new char[size];
 		file.seekg(0, std::ios::beg);
 		file.read(buffer, size);
@@ -36,8 +41,34 @@ void Memory::LoadFile(char const* FileName)
 			Mem[i] = buffer[i];
 		}
 
-
 		delete[] buffer;
+    }
+}
 
+void Video::Initialize()
+{
+    for (int i = 0; i < 2400; i++)
+    {
+        Mem[i] = 0;
+        Pixel[i] = 0;
+    }
+}
+
+void Video::Apply(uint8_t x, uint8_t y, uint8_t data)
+{
+    Pixel[y*60+x] = (data & 0b00100000) > 0;
+    Pixel[y*60+x+1] = (data & 0b00010000) > 0;
+    Pixel[y*60+x+2] = (data & 0b00001000) > 0;
+    Pixel[y*60+x+3] = (data & 0b00000100) > 0;
+    Pixel[y*60+x+4] = (data & 0b00000010) > 0;
+    Pixel[y*60+x+5] = (data & 0b00000001) > 0;
+}
+
+void Video::Update()
+{
+
+    for (int i = 0; i < 2400; i++)
+    {
+        Mem[i] = (Pixel[i] == 1) ? 0xFFFFFFFF : 0x00000000;
     }
 }

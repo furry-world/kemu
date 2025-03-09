@@ -32,7 +32,7 @@ struct CPU
 
     int cyclesToExecute;
 
-    void Reset(Memory&, Memory&);
+    void Reset(Memory&, Memory&, Video&);
 
     uint8_t FetchByte (int&, Memory&);
 
@@ -40,7 +40,7 @@ struct CPU
 
     void StoreByteRAM (int&, Memory&, uint8_t, uint8_t);
 
-    void Execute (int, Memory&, Memory&);
+    void Execute (int, Memory&, Memory&, Video&);
     
 };
 
