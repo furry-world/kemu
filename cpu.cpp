@@ -274,7 +274,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
 
                 Registers[(value1 & 0b00111000) >> 3] = Registers[value1 & 0b00000111];
 
-                if (Registers[(value1 & 0b00111000) >> 3] == 6)
+                if ((value1 & 0b00111000) >> 3 == 6)
                 {
                     video.flag = 1;
                 } 
