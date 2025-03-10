@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     while(!WindowShouldClose())
     {
 
-        cpu.Execute(GetFrameTime() * 1000.00, rom, ram, system, platform);
+        cpu.Execute(GetFrameTime() * 1000000.00, rom, ram, system, platform);
 
         BeginDrawing();
         system.Update();
