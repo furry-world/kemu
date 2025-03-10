@@ -55,7 +55,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
                 CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP, PC & 0b0000000000111111);
                 CPU::StoreByteRAM(cyclesToExecute, ram, 240 + SP + 1, (PC & 0b0000111111000000) >> 6);
 
-                if (SP < 14)
+                if (SP < 15)
                 {
                     SP++;    
                 }
@@ -172,7 +172,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                if ((value1 & 0b00111000) >> 3] != 7)
+                if ((value1 & 0b00111000) >> 3 != 7)
                 {
                     Registers[(value1 & 0b00111000) >> 3] += Registers[(value1 & 0b00000111)];
 
@@ -199,7 +199,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                if ((value1 & 0b00111000) >> 3] != 7)
+                if ((value1 & 0b00111000) >> 3 != 7)
                 {
                     Registers[(value1 & 0b00111000) >> 3] -= Registers[(value1 & 0b00000111)];
 
