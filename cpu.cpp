@@ -338,7 +338,9 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] << Registers[7];
+                Registers[7] = Registers[(value1 & 0b00111000) >> 3] & 0b00100000;
+
+                Registers[(value1 & 0b00111000) >> 3] = (Registers[(value1 & 0b00111000) >> 3] << 1) & 0b00111111;
 
                 cyclesToExecute--;
             } break;
@@ -347,7 +349,9 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] >> Registers[7];
+                Registers[7] = Registers[(value1 & 0b00111000) >> 3] & 0b00000001;
+
+                Registers[(value1 & 0b00111000) >> 3] = Registers[(value1 & 0b00111000) >> 3] >> 1;
 
                 cyclesToExecute--;
             } break;
