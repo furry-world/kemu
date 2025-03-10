@@ -416,12 +416,12 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             ram[239] = ram[239] | 0b00000100;
         }
 
-        if (IsKeyDown(KEY_Y))
+        if (IsKeyDown(KEY_COMMA))
         {
             ram[239] = ram[239] | 0b00000010;
         }
 
-        if (IsKeyDown(KEY_X))
+        if (IsKeyDown(KEY_PERIOD))
         {
             ram[239] = ram[239] | 0b00000001;
         }
