@@ -39,6 +39,8 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
     while (cyclesToExecute > 0)
     {
         uint8_t Ins = CPU::FetchByte(cyclesToExecute, rom);
+
+        printf("Performing operation %d at PC address %d\n", Ins, PC);
         switch(Ins)
         {
             case INS_CALL:
@@ -141,7 +143,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     if (Registers[(value1 & 0b00111000) >> 3] != value2 & 0b00111111 )
                     {
                         uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
-                        PC += WordLen[In];
+                        PC += WordLen[In]-1;
                         cyclesToExecute -= WordLen[In];
                     }
                 }
@@ -150,7 +152,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     if (Registers[(value1 & 0b00111000) >> 3] != CPU::FetchByteRAM(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2))
                     {
                         uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
-                        PC += WordLen[In];
+                        PC += WordLen[In]-1;
                         cyclesToExecute -= WordLen[In];
                     }
                 }
