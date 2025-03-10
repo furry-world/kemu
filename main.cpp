@@ -1,45 +1,41 @@
 #include "cpu.h"
 #include <iostream>
-#include "raylib.h"
-#include "platform.h"
 
 int main(int argc, char** argv) {
 
-    if (argc != 2)
+    if (argc != 3)
 	{
 		printf("Usage: %s <file>\n", argv[0]);
 		std::exit(0);
 	}
 
-    int videoScale = 10;
-
     char const* romFilename = argv[1];
+
+    int videoScale = atoi(argv[2]);
 
     Platform platform("kemu - Game N' Wave emulator", 60 * videoScale, 40 * videoScale, 60, 40);
 
 
     Memory ram(256);
     Memory rom(4096);
-    Video video;
+    System system;
 
     CPU cpu;
 
-    cpu.Reset(ram, rom, video);
+    cpu.Reset(ram, rom, system);
 
     rom.LoadFile(romFilename);
+
+    SetTargetFPS(60);
 
     while(!WindowShouldClose())
     {
 
-        if (IsKeyDown(KEY_SPACE))
-        {
-            cpu.Execute(23, rom, ram, video);
-            std::cout << "Press  to advance the program.\n";
-        }
+        cpu.Execute(GetFrameTime() * 1000.00, rom, ram, system, platform);
 
         BeginDrawing();
-        video.Update();
-        platform.Update(&video);
+        system.Update();
+        platform.Update(&system);
 
         EndDrawing();
     }

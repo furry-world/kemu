@@ -2,13 +2,13 @@
 
 Memory::Memory(unsigned int Count)
 {
-    Memory::MAX_MEM = Count;
-    Mem.reserve(Memory::MAX_MEM);
+    MAX_MEM = Count;
+    Mem.reserve(MAX_MEM);
 }
 
 void Memory::Initialize(unsigned char Value)
 {
-    for (int i = 0; i < Memory::MAX_MEM; i++)
+    for (int i = 0; i < MAX_MEM; i++)
     {
         Mem[i] = Value;
     }
@@ -45,16 +45,17 @@ void Memory::LoadFile(char const* FileName)
     }
 }
 
-void Video::Initialize()
+void System::Initialize()
 {
     for (int i = 0; i < 2400; i++)
     {
         Mem[i] = 0;
         Pixel[i] = 0;
     }
+    
 }
 
-void Video::Apply(uint8_t x, uint8_t y, uint8_t data)
+void System::VideoApply(uint8_t x, uint8_t y, uint8_t data)
 {
     Pixel[y*60+x] = (data & 0b00100000) > 0;
     Pixel[y*60+x+1] = (data & 0b00010000) > 0;
@@ -64,7 +65,17 @@ void Video::Apply(uint8_t x, uint8_t y, uint8_t data)
     Pixel[y*60+x+5] = (data & 0b00000001) > 0;
 }
 
-void Video::Update()
+void System::VideoApplyPixel(uint8_t x, uint8_t y)
+{
+    Pixel[y*60+x] = (Pixel[y*60+x] == 0) ? 1 : 0;
+}
+
+float System::GetSound(uint8_t value)
+{
+    return PitchTable[value];
+}
+
+void System::Update()
 {
 
     for (int i = 0; i < 2400; i++)

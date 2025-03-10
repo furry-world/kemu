@@ -1,17 +1,17 @@
 #include "cpu.h"
 
-void CPU::Reset(Memory& ram, Memory& rom, Video& video){
+void CPU::Reset(Memory& ram, Memory& rom, System& system){
     PC = 0;
     SP = 0;
 
     ram.Initialize(0);
     rom.Initialize(63);
-    video.Initialize();
+    system.Initialize();
 
     cyclesToExecute = 0;
 }
 
-uint8_t CPU::FetchByte (int& Cycles, Memory& memory)
+uint8_t CPU::FetchByte (float& Cycles, Memory& memory)
 {
     uint8_t Data = memory[PC];
     PC++;
@@ -19,28 +19,26 @@ uint8_t CPU::FetchByte (int& Cycles, Memory& memory)
     return Data;
 }
 
-uint8_t CPU::FetchByteRAM (int& Cycles, Memory& memory, uint8_t address)
+uint8_t CPU::FetchByteRAM (float& Cycles, Memory& memory, uint8_t address)
 {
     uint8_t Data = memory[address];
     Cycles--;
     return Data;
 }
 
-void CPU::StoreByteRAM (int& Cycles, Memory& memory, uint8_t address, uint8_t value)
+void CPU::StoreByteRAM (float& Cycles, Memory& memory, uint8_t address, uint8_t value)
 {
     Cycles--;
     memory[address] = value;
 }
 
-void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
+void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platform& interface)
 {
     cyclesToExecute += Cycles;
 
     while (cyclesToExecute > 0)
     {
-
         uint8_t Ins = CPU::FetchByte(cyclesToExecute, rom);
-        // printf("Operation: %d\n", Ins);
         switch(Ins)
         {
             case INS_CALL:
@@ -252,7 +250,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
 
                 if ((value1 & 0b00111000) >> 3 == 6)
                 {
-                    video.flag = 1;
+                    system.flag = 1;
                 } 
 
                 cyclesToExecute--;
@@ -276,7 +274,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
 
                 if ((value1 & 0b00111000) >> 3 == 6)
                 {
-                    video.flag = 1;
+                    system.flag = 1;
                 } 
 
                 cyclesToExecute--;
@@ -379,12 +377,53 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
             }
         }
 
-        if (video.flag == 1)
+        if (system.flag == 1)
         {
-            video.Apply(Registers[4], Registers[5], Registers[3]);
-            video.flag = 0;
+            switch(Registers[6])
+            {
+                case 0:
+                    system.VideoApplyPixel(Registers[4], Registers[5]);
+                    break;
+                case 1:
+                    system.VideoApply(Registers[4], Registers[5], Registers[3]);
+                    break;
+                case 2:
+                    interface.SetFreq(system.GetSound(Registers[5]));
+                    break;
+            }
+            system.flag = 0;
+        }
+        
+        ram[239] = 0;
+
+        if (IsKeyDown(KEY_UP))
+        {
+            ram[239] = ram[239] | 0b00100000;
         }
 
-        printf("A: %d | B: %d | C: %d | D: %d | E: %d | F: %d | G: %d | H: %d\n", Registers[0], Registers[1], Registers[2], Registers[3], Registers[4], Registers[5], Registers[6], Registers[7]);
+        if (IsKeyDown(KEY_DOWN))
+        {
+            ram[239] = ram[239] | 0b00010000;
+        }
+
+        if (IsKeyDown(KEY_LEFT))
+        {
+            ram[239] = ram[239] | 0b00001000;
+        }
+
+        if (IsKeyDown(KEY_RIGHT))
+        {
+            ram[239] = ram[239] | 0b00000100;
+        }
+
+        if (IsKeyDown(KEY_Y))
+        {
+            ram[239] = ram[239] | 0b00000010;
+        }
+
+        if (IsKeyDown(KEY_X))
+        {
+            ram[239] = ram[239] | 0b00000001;
+        }
     }
 }

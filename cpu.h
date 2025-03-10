@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include "memory.h"
+#include "platform.h"
 
 struct CPU
 {
@@ -30,17 +31,17 @@ struct CPU
     static constexpr uint8_t INS_SHIFTL = 0x10;
     static constexpr uint8_t INS_SHIFTR = 0x11;
 
-    int cyclesToExecute;
+    float cyclesToExecute;
 
-    void Reset(Memory&, Memory&, Video&);
+    void Reset(Memory&, Memory&, System&);
 
-    uint8_t FetchByte (int&, Memory&);
+    uint8_t FetchByte (float&, Memory&);
 
-    uint8_t FetchByteRAM (int&, Memory&, uint8_t);
+    uint8_t FetchByteRAM (float&, Memory&, uint8_t);
 
-    void StoreByteRAM (int&, Memory&, uint8_t, uint8_t);
+    void StoreByteRAM (float&, Memory&, uint8_t, uint8_t);
 
-    void Execute (int, Memory&, Memory&, Video&);
+    void Execute (float, Memory&, Memory&, System&, Platform&);
     
 };
 
