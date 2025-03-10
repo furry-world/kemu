@@ -40,7 +40,6 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
     {
         uint8_t Ins = CPU::FetchByte(cyclesToExecute, rom);
 
-        printf("Performing operation %d at PC address %d\n", Ins, PC);
         switch(Ins)
         {
             case INS_CALL:
@@ -280,7 +279,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 } 
 
                 cyclesToExecute--;
-            }
+            } break;
 
             case INS_REQU:
             {
@@ -301,7 +300,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 if (Registers[(value1 & 0b00111000) >> 3] != Registers[value1 & 0b00000111])
                 {
                     uint8_t In = CPU::FetchByte(cyclesToExecute, rom);
-                    PC += WordLen[In];
+                    PC += WordLen[In]-1;
                     cyclesToExecute -= WordLen[In];
                 }
                 cyclesToExecute--;

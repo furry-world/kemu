@@ -33,6 +33,9 @@ int main(int argc, char** argv) {
 
         cpu.Execute(GetFrameTime() * 1000000.00, rom, ram, system, platform);
 
+        if (ram[238] > 63) ram[238] = 63;
+        ram[238]--;
+
         BeginDrawing();
         system.Update();
         platform.Update(&system);
