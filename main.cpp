@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
     if (argc != 3)
 	{
-		printf("Usage: %s <file>\n", argv[0]);
+		printf("Usage: %s <file> <size>\n", argv[0]);
 		std::exit(0);
 	}
 
