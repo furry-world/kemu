@@ -172,7 +172,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                if (Registers[(value1 & 0b00111000) >> 3] != 7)
+                if ((value1 & 0b00111000) >> 3] != 7)
                 {
                     Registers[(value1 & 0b00111000) >> 3] += Registers[(value1 & 0b00000111)];
 
@@ -199,7 +199,7 @@ void CPU::Execute (int Cycles, Memory& rom, Memory& ram, Video& video)
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                if (Registers[(value1 & 0b00111000) >> 3] != 7)
+                if ((value1 & 0b00111000) >> 3] != 7)
                 {
                     Registers[(value1 & 0b00111000) >> 3] -= Registers[(value1 & 0b00000111)];
 
