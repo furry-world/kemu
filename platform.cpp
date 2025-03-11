@@ -47,7 +47,7 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
         sum = 0;
         for (unsigned int j = 0; j < submul; j++)
         {
-            sum += beepIdx < 0.25 ? 1 : -1;
+            sum += beepIdx < 0.5 ? 1 : -1;
             beepIdx += subincr;
             if (beepIdx > 1.0f) beepIdx -= 1.0f;
 
