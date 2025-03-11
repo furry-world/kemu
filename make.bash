@@ -1,1 +1,0 @@
-g++ main.cpp memory.cpp cpu.cpp platform.cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
