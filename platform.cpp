@@ -45,9 +45,14 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 
     for (unsigned int i = 0; i < frames; i++)
     {
-        d[i] = (short)(MAX_SAMPLE_SIZE * (beepIdx < 0.1 ? 1 : -1));
+        d[i] = (short)(MAX_SAMPLE_SIZE * (
+            beepIdx < 0.01 ? beepIdx * 100 :
+            beepIdx < 0.5 ? 1 :
+            beepIdx < 0.51 ? (0.51 - beepIdx) * 100 :
+            0
+        ));
         beepIdx += incr;
-        if (beepIdx > 1.0f) beepIdx -= 1.0f;
+        while (beepIdx > 1.0f) beepIdx -= 1.0f;
     }
 }
 
