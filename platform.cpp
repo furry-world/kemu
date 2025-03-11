@@ -4,7 +4,7 @@
 Platform::Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
 {
 	InitWindow(windowWidth, windowHeight, title);
-    
+
     image = GenImageColor(textureWidth, textureHeight, (Color) {199, 240, 216, 255});
     texture = LoadTextureFromImage(image);
     texture_rect = {0, 0, float(textureWidth), float(textureHeight)};
@@ -35,21 +35,31 @@ void Platform::SetFreq(float Value)
 
 void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 {
+    const int submul = 50;
     float incr = Freq/44100.0f;
+    float subincr = incr/submul;
     short *d = (short *)buffer;
+
+    float sum;
 
     for (unsigned int i = 0; i < frames; i++)
     {
-        d[i] = (short)(MAX_SAMPLE_SIZE * (beepIdx < 0.25 ? 1 : -1) * 0.2);
-        beepIdx += incr;
-        if (beepIdx > 1.0f) beepIdx -= 1.0f;
+        sum = 0;
+        for (unsigned int j = 0; j < submul; j++)
+        {
+            sum += beepIdx < 0.25 ? 1 : -1;
+            beepIdx += subincr;
+            if (beepIdx > 1.0f) beepIdx -= 1.0f;
+
+        }
+        d[i] = (short)(MAX_SAMPLE_SIZE * (sum / submul) * 0.2);
     }
 }
 
 void Platform::AudioProcessEffectLPF(void *buffer, unsigned int frames)
 {
     static float low[2] = { 0.0f, 0.0f };
-    static const float cutoff = 70.0f / 44100.0f; // 70 Hz lowpass filter
+    static const float cutoff = 20000.0f / 44100.0f; // 70 Hz lowpass filter
     const float k = cutoff / (cutoff + 0.1591549431f); // RC filter formula
 
     // Converts the buffer data before using it
@@ -71,4 +81,5 @@ void Platform::Update(void const* buffer)
     ClearBackground((Color) {199, 240, 216, 255});
     UpdateTexture(texture, buffer);
     DrawTexturePro(texture, texture_rect, screen_rect, (Vector2) {0, 0}, 0, (Color) {67, 82, 61, 255});
+
 }

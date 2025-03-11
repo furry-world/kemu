@@ -23,7 +23,6 @@ public:
 private:
 
 	static void AudioInputCallback(void *buffer, unsigned int frames);
-
 	static void AudioProcessEffectLPF(void *buffer, unsigned int frames);
 
 	Image image;
