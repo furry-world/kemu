@@ -30,6 +30,10 @@ struct CPU
     static constexpr uint8_t INS_XOR = 0x0F;
     static constexpr uint8_t INS_SHIFTL = 0x10;
     static constexpr uint8_t INS_SHIFTR = 0x11;
+    static constexpr uint8_t INS_ILOAD = 0x12;
+    static constexpr uint8_t INS_ISTORE = 0x13;
+    static constexpr uint8_t INS_IPLOAD= 0x14;
+    static constexpr uint8_t INS_IPSTORE = 0x15;
 
     float cyclesToExecute;
 

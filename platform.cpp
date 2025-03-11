@@ -15,8 +15,6 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
     InitAudioDevice();
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
     stream = LoadAudioStream(44100, 16, 1);
-    data = (short *)malloc(sizeof(short)*MAX_SAMPLES);
-    writeBuf = (short *)malloc(sizeof(short)*MAX_SAMPLES_PER_UPDATE);
     SetAudioStreamCallback(stream, AudioInputCallback);
 
     PlayAudioStream(stream);
@@ -24,12 +22,8 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
 
 Platform::~Platform()
 {
-    free(data);
-    free(writeBuf);
-
     UnloadAudioStream(stream);
     CloseAudioDevice();
-
 	CloseWindow();
 }
 
@@ -45,7 +39,7 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 
     for (unsigned int i = 0; i < frames; i++)
     {
-        d[i] = (short)(MAX_SAMPLE_SIZE * (beepIdx < 0.1 ? 1 : -1));
+        d[i] = (short)(MAX_SAMPLE_SIZE * (beepIdx < 0.25 ? 1 : -1) * 0.2);
         beepIdx += incr;
         if (beepIdx > 1.0f) beepIdx -= 1.0f;
     }
