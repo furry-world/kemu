@@ -44,15 +44,18 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 
     for (unsigned int i = 0; i < frames; i++)
     {
-        sum = 0;
-        for (unsigned int j = 0; j < submul; j++)
+        if (Freq == 0) {d[i] = 0;}
+        else
         {
-            sum += beepIdx < 0.5 ? 1 : -1;
-            beepIdx += subincr;
-            if (beepIdx > 1.0f) beepIdx -= 1.0f;
-
+            sum = 0;
+            for (unsigned int j = 0; j < submul; j++)
+            {
+                sum += beepIdx < 0.5 ? 1 : -1;
+                beepIdx += subincr;
+                if (beepIdx > 1.0f) beepIdx -= 1.0f;
+            }
+            d[i] = (short)(MAX_SAMPLE_SIZE * (sum / submul) * 0.2);
         }
-        d[i] = (short)(MAX_SAMPLE_SIZE * (sum / submul) * 0.2);
     }
 }
 
