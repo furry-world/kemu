@@ -8,6 +8,8 @@ void CPU::Reset(Memory& ram, Memory& rom, System& system){
     rom.Initialize(63);
     system.Initialize();
 
+    srand(time(0));
+
     cyclesToExecute = 0;
 }
 
@@ -476,5 +478,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
         {
             ram[239] = ram[239] | 0b00000001;
         }
+
+        ram[237] = rand() % 64;
     }
 }

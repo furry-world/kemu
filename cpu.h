@@ -3,6 +3,7 @@
 
 #include "memory.h"
 #include "platform.h"
+#include "ctime"
 
 struct CPU
 {
