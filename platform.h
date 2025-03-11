@@ -24,6 +24,8 @@ private:
 
 	static void AudioInputCallback(void *buffer, unsigned int frames);
 
+	static void AudioProcessEffectLPF(void *buffer, unsigned int frames);
+
 	Image image;
 	Texture2D texture;
 	Rectangle screen_rect;
