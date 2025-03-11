@@ -62,10 +62,9 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 void Platform::AudioProcessEffectLPF(void *buffer, unsigned int frames)
 {
     static float low[2] = { 0.0f, 0.0f };
-    static const float cutoff = 20000.0f / 44100.0f; // 70 Hz lowpass filter
-    const float k = cutoff / (cutoff + 0.1591549431f); // RC filter formula
+    static const float cutoff = 20000.0f / 44100.0f;
+    const float k = cutoff / (cutoff + 0.1591549431f);
 
-    // Converts the buffer data before using it
     float *bufferData = (float *)buffer;
     for (unsigned int i = 0; i < frames*2; i += 2)
     {
