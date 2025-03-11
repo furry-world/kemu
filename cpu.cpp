@@ -370,7 +370,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 }
 
                 cyclesToExecute -= 2;
-                } break;
+            } break;
 
             case INS_ISTORE:
             {
