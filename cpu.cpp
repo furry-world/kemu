@@ -17,6 +17,7 @@ uint8_t CPU::FetchByte (float& Cycles, Memory& memory)
 {
     uint8_t Data = memory[PC];
     PC++;
+    PC = PC & 0b0000111111111111;
     Cycles--;
     return Data;
 }
