@@ -36,7 +36,8 @@ struct System
         523.25, 554.37, 587.33, 622.25, 659.25, 698.46, 739.99, 783.99, 830.61, 880, 932.33, 987.77,
         1046.50, 1108.73, 1174.66, 1244.51, 1318.51, 1396.91 , 1479.98, 1567.98};
     void VideoApply(uint8_t, uint8_t, uint8_t);
-    void VideoApplyPixel(uint8_t, uint8_t);
+    void VideoPixelOn(uint8_t, uint8_t);
+    void VideoPixelOff(uint8_t, uint8_t);
     float GetSound(uint8_t);
     void Update();
     bool flag;

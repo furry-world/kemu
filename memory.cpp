@@ -57,17 +57,22 @@ void System::Initialize()
 
 void System::VideoApply(uint8_t x, uint8_t y, uint8_t data)
 {
-    Pixel[y*60+x] = (data & 0b00100000) > 0;
-    Pixel[y*60+x+1] = (data & 0b00010000) > 0;
-    Pixel[y*60+x+2] = (data & 0b00001000) > 0;
-    Pixel[y*60+x+3] = (data & 0b00000100) > 0;
-    Pixel[y*60+x+4] = (data & 0b00000010) > 0;
-    Pixel[y*60+x+5] = (data & 0b00000001) > 0;
+    if (x < 60 && y < 40) Pixel[y*60+x] = (data & 0b00100000) > 0;
+    if (x+1 < 60 && y < 40) Pixel[y*60+x+1] = (data & 0b00010000) > 0;
+    if (x+2 < 60 && y < 40) Pixel[y*60+x+2] = (data & 0b00001000) > 0;
+    if (x+3 < 60 && y < 40) Pixel[y*60+x+3] = (data & 0b00000100) > 0;
+    if (x+4 < 60 && y < 40) Pixel[y*60+x+4] = (data & 0b00000010) > 0;
+    if (x+5 < 60 && y < 40) Pixel[y*60+x+5] = (data & 0b00000001) > 0;
 }
 
-void System::VideoApplyPixel(uint8_t x, uint8_t y)
+void System::VideoPixelOn(uint8_t x, uint8_t y)
 {
-    Pixel[y*60+x] = (Pixel[y*60+x] == 0) ? 1 : 0;
+    if (x < 60 && y < 40) Pixel[y*60+x] = 1;
+}
+
+void System::VideoPixelOff(uint8_t x, uint8_t y)
+{
+    if (x < 60 && y < 40) Pixel[y*60+x] = 0;
 }
 
 float System::GetSound(uint8_t value)

@@ -165,7 +165,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             {
                 uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
 
-                PC += value1 & 0b11000000;
+                PC += value1 & 0b00111111;
 
                 cyclesToExecute--;
             } break;
@@ -436,13 +436,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             switch(Registers[6])
             {
                 case 0:
-                    system.VideoApplyPixel(Registers[4], Registers[5]);
+                    system.VideoPixelOn(Registers[4], Registers[5]);
                     break;
                 case 1:
                     system.VideoApply(Registers[4], Registers[5], Registers[3]);
                     break;
                 case 2:
                     interface.SetFreq(system.GetSound(Registers[5]));
+                    break;
+                case 3:
+                    system.VideoPixelOff(Registers[4], Registers[5]);
                     break;
             }
             system.flag = 0;
