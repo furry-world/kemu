@@ -12,11 +12,12 @@
 
 struct Memory
 {
-    Memory(unsigned int);
+    Memory(unsigned int, bool);
     void Initialize(unsigned char);
     std::vector<uint8_t> Mem{};
     uint8_t& operator[](uint32_t);
     void LoadFile(char const*);
+    bool type;
 
 private:   
     uint32_t MAX_MEM;

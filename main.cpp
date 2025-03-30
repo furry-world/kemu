@@ -1,10 +1,11 @@
 #include "cpu.h"
+#include <string>
 
 int main(int argc, char** argv) {
 
-    if (argc != 3)
+    if (argc != 4)
 	{
-		printf("Usage: %s <file> <size>\n", argv[0]);
+		printf("Usage: %s <file> <size> <RAM/ROM>\n", argv[0]);
 		std::exit(0);
 	}
 
@@ -12,11 +13,29 @@ int main(int argc, char** argv) {
 
     int videoScale = atoi(argv[2]);
 
+    std::string type = argv[3];
+
+    bool wharType;
+    if (type.compare("RAM") == 0)
+    {
+        wharType = false;
+    }
+    else if (type.compare("ROM") == 0)
+    {
+        wharType = true;
+    }
+    else
+    {
+        printf("Incorrect assigned of third paramater (RAM or ROM)\n");
+		std::exit(0);
+    }
+    
+
     Platform platform("kemu - Game N' Wave emulator", 60 * videoScale, 40 * videoScale, 60, 40);
 
 
-    Memory ram(256);
-    Memory rom(4096);
+    Memory ram(256, true);
+    Memory rom(4096, wharType);
     System system;
 
     CPU cpu;

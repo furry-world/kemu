@@ -392,7 +392,10 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
                     uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
 
-                    Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2));
+                    if (rom.type == false)
+                    {
+                        Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2));
+                    }
 
                     cyclesToExecute--;
                 }
@@ -409,8 +412,11 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 {
                     uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
                     uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
-
-                    Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2 + Registers[3]));
+                    
+                    if (rom.type == false)
+                    {
+                        Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2 + Registers[3]));
+                    }
 
                     cyclesToExecute -= 2;
                 }

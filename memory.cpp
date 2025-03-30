@@ -1,9 +1,10 @@
 #include "memory.h"
 
-Memory::Memory(unsigned int Count)
+Memory::Memory(unsigned int Count, bool Type)
 {
     MAX_MEM = Count;
     Mem.reserve(MAX_MEM);
+    type = Type;
 }
 
 void Memory::Initialize(unsigned char Value)
