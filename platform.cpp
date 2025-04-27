@@ -25,7 +25,6 @@ Platform::~Platform()
 {
     UnloadAudioStream(stream);
     CloseAudioDevice();
-	CloseWindow();
 }
 
 void Platform::SetFreq(float Value)
