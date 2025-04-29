@@ -13,7 +13,7 @@
 struct Memory
 {
     Memory(unsigned int, bool);
-    void Initialize(unsigned char);
+    void Initialize(uint8_t);
     std::vector<uint8_t> Mem{};
     uint8_t& operator[](uint32_t);
     void LoadFile(char const*);

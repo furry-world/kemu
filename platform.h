@@ -11,12 +11,11 @@
 
 class Platform
 {
-	friend class Imgui;
 
 public:
 	Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
 	~Platform();
-	void Update(void const* buffer);
+	void Update(void const* buffer, bool check);
 	void SetFreq(float);
 
 
@@ -32,5 +31,6 @@ private:
 	AudioStream stream;
 };
 
+static bool check = true;
 static float Freq;
 static float beepIdx = 0.0f;

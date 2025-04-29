@@ -7,7 +7,7 @@ Memory::Memory(unsigned int Count, bool Type)
     type = Type;
 }
 
-void Memory::Initialize(unsigned char Value)
+void Memory::Initialize(uint8_t Value)
 {
     for (int i = 0; i < MAX_MEM; i++)
     {
@@ -37,7 +37,7 @@ void Memory::LoadFile(char const* FileName)
 		file.read(buffer, size);
 		file.close();
 
-        for (long i = 0; i < size; ++i)
+        for (long i = 0; i < MAX_MEM; ++i)
 		{
 			Mem[i] = buffer[i];
 		}
@@ -53,7 +53,6 @@ void System::Initialize()
         Mem[i] = 0;
         Pixel[i] = 0;
     }
-    
 }
 
 void System::VideoApply(uint8_t x, uint8_t y, uint8_t data)

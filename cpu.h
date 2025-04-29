@@ -36,7 +36,7 @@ struct CPU
 
     float cyclesToExecute;
 
-    void Reset(Memory&, Memory&, System&);
+    void Reset(Memory&, Memory&, System&, Platform&);
 
     uint8_t FetchByte (float&, Memory&);
 
