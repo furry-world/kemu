@@ -4,6 +4,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include <iostream>
+#include <format>
 
 bool isRunning = false;
 bool preferences = false;
@@ -27,6 +28,7 @@ int main() {
     {
         if(isRunning)
         {
+            // std::cout << cpu.PC << std::endl;
             cpu.Execute(GetFrameTime() * 1000000.00, rom, ram, system, platform);
             if (ram[238] > 0) ram[238]--;
         }
@@ -48,26 +50,23 @@ int main() {
             isRunning = true;
         };
         if (GuiButton((Rectangle) {150, 0, 150, 40}, "Preferences")) preferences = true;
+
         if (preferences)
         {
-            isRunning = false;
-            int result = GuiMessageBox((Rectangle){150, 190, 300, 100}, "Preferences", "Please select a mode", "RAM;ROM");
+            int result = GuiMessageBox((Rectangle){150, 190, 300, 100}, "Preferences", "Please select a mode", "ROM;RAM");
 
             if (result == 1) 
             {
-                rom.type = true;
-                isRunning = true;
+                rom.type = false;
                 preferences = false;
             }
             else if (result == 2)
             {
-                rom.type = false;
-                isRunning = true;
+                rom.type = true;
                 preferences = false;
             }
             else if (result == 0)
             {
-                isRunning = true;
                 preferences = false;
             }
         }

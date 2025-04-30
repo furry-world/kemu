@@ -27,7 +27,7 @@ void Memory::LoadFile(char const* FileName)
     if (file.is_open())
     {
         std::streampos size = file.tellg();
-        if (size > Memory::MAX_MEM)
+        if (size > MAX_MEM)
         {
             printf("Error! ROM size exceeds limit!\n");
             exit(0);

@@ -5,7 +5,7 @@ void CPU::Reset(Memory& ram, Memory& rom, System& system, Platform& interface){
     SP = 0;
 
     ram.Initialize(0);
-    rom.Initialize(63);
+    rom.Initialize(31);
     system.Initialize();
 
     srand(time(0));
@@ -393,17 +393,13 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 {
                     uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
                     uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
-
-                    if (rom.type)
+                    if (Registers[Ins & 0b00000111] != 7)
                     {
-                        if (Registers[Ins & 0b00000111] != 7)
-                        {
-                            Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2));
-                        }
-                        else
-                        {
-                            Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2)) & 0b00000001;
-                        }
+                        Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2));
+                    }
+                    else
+                    {
+                        Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2)) & 0b00000001;
                     }
 
                     cyclesToExecute--;
@@ -413,7 +409,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
                     uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
 
-                    rom[(uint16_t)(value1 + value2)] = Registers[Ins & 0b00000111];
+                    if (rom.type == true) rom[(uint16_t)(value1 + value2)] = Registers[Ins & 0b00000111];
 
                     cyclesToExecute -= 2;;
                 }
@@ -422,9 +418,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
                     uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
                     
-                    if (rom.type)
-                    {
-                        if (Registers[Ins & 0b00000111] != 7)
+                    if (Registers[Ins & 0b00000111] != 7)
                         {
                             Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2 + Registers[3]));
                         }
@@ -432,7 +426,6 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                         {
                             Registers[Ins & 0b00000111] = CPU::FetchByteRAM(cyclesToExecute, rom, (uint16_t)(value1 + value2 + Registers[3])) & 0b00000001;
                         }
-                    }
 
                     cyclesToExecute -= 2;
                 }
@@ -441,7 +434,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     uint8_t value1 = CPU::FetchByte(cyclesToExecute, rom);
                     uint8_t value2 = CPU::FetchByte(cyclesToExecute, rom);
 
-                    rom[(uint16_t)(value1 + value2 + Registers[3])] = Registers[Ins & 0b00000111];
+                    if (rom.type == true) rom[(uint16_t)(value1 + value2 + Registers[3])] = Registers[Ins & 0b00000111];
 
                     cyclesToExecute -= 3;
                 }
