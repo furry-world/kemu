@@ -15,7 +15,6 @@ void CPU::Reset(Memory& ram, Memory& rom, System& system, Platform& interface){
 
     srand(time(0));
 
-    ram[238] = 0;
     counter = 0;
 
     cyclesToExecute = 0;

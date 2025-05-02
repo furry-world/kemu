@@ -1,8 +1,9 @@
 #include "cpu.h"
-#include "portable-file-dialogs.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
-#include <format>
+#undef RAYGUI_IMPLEMENTATION
+#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
+#include "gui_window_file_dialog.h"
 
 bool preferences = false;
 bool debugFlag = false;
@@ -29,8 +30,27 @@ int main() {
 
     SetTargetFPS(60);
 
+    GuiWindowFileDialogState fileDialogState = InitGuiWindowFileDialog(GetWorkingDirectory());
+
     while(!WindowShouldClose())
     {
+
+        if (fileDialogState.SelectFilePressed)
+        {
+
+            char fileNameToLoad[512] = { 0 };
+
+            if (IsFileExtension(fileDialogState.fileNameText, ".gnw"))
+            {
+                strcpy(fileNameToLoad, TextFormat("%s" PATH_SEPERATOR "%s", fileDialogState.dirPathText, fileDialogState.fileNameText));
+                cpu.Reset(ram, rom, system, platform);
+                rom.LoadFile(fileNameToLoad);
+                if (isLocked) isLocked = false;
+            }
+            fileDialogState.SelectFilePressed = false;
+        }
+
+
         if (!isLocked)
         {
             if (!isPaused)
@@ -45,24 +65,29 @@ int main() {
 
         if (IsKeyPressed(KEY_P)) isPaused = !isPaused;
 
+        if (IsKeyPressed(KEY_R))
+        {
+            cpu.PC = 0;
+            cpu.SP = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                cpu.Registers[i] = 0;
+            }
+
+            ram.Initialize(0);
+
+            cpu.counter = 0;
+
+            cpu.Note = 0;
+            platform.SetFreq(0);
+        }
+
         system.Update();
 
         BeginDrawing();
         platform.Update(&system);
 
-        if (GuiButton((Rectangle) {0, 0, 150, 40}, "Open file"))
-        {
-            isLocked = true;
-            auto f = pfd::open_file("Choose files to read", pfd::path::home(),
-            { "GNW files (.gnw)", "*.gnw"}).result();
-            if (!f.empty()) 
-            {
-                cpu.Reset(ram, rom, system, platform);
-                rom.LoadFile(f[0].c_str());
-            }
-            if (rom[0] != 31) isLocked = false;
-        };
-
+        if (GuiButton((Rectangle) {0, 0, 150, 40}, "Open file")) fileDialogState.windowActive = true;
         if (GuiButton((Rectangle) {150, 0, 150, 40}, "Preferences")) preferences = true;
 
         if (preferences)
@@ -101,7 +126,10 @@ int main() {
             GuiPanel((Rectangle) {900, 0, 300, 440}, "Disassembly");
             GuiPanel((Rectangle) {0, 440, 160, 440}, "RAM");
             GuiPanel((Rectangle) {160, 440, 1040, 440}, "ROM");
-            DrawText(std::format("PC: {}\nSP: {}\nA: {}\nB: {}\nC: {}\nD: {}\nE: {}\nF: {}\nG: {}\nH: {}\nNote: {}\nInput: {}\nTimer: {}", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, ram[239], ram[238]).c_str(), 610, 40, 20, DARKGRAY);
+
+            char states[256];
+            sprintf(states, "PC: %o\nSP: %o\nA: %o\nB: %o\nC: %o\nD: %o\nE: %o\nF: %o\nG: %o\nH: %o\nNote: %o\nInput: %o\nTimer: %o", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, ram[239], ram[238]);
+            DrawText(states, 610, 40, 20, DARKGRAY);
 
             if (GuiButton((Rectangle) {1000, 600, 150, 40}, "Slice 1")) currentSelection = 0;
             if (GuiButton((Rectangle) {1000, 640, 150, 40}, "Slice 2")) currentSelection = 1;
@@ -142,6 +170,8 @@ int main() {
         }
 
         GuiButton((Rectangle) {450, 0, 150, 40}, "About");
+
+        GuiWindowFileDialog(&fileDialogState);
 
         EndDrawing();
     }
