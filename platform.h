@@ -15,7 +15,7 @@ class Platform
 public:
 	Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
 	~Platform();
-	void Update(void const* buffer, bool check);
+	void Update(void const* buffer);
 	void SetFreq(float);
 
 

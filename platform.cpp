@@ -1,5 +1,4 @@
 #include "platform.h"
-#include "raylib.h"
 
 Platform::Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
 {
@@ -77,24 +76,9 @@ void Platform::AudioProcessEffectLPF(void *buffer, unsigned int frames)
     }
 }
 
-void Platform::Update(void const* buffer, bool check)
+void Platform::Update(void const* buffer)
 {
     ClearBackground((Color) {199, 240, 216, 255});
     UpdateTexture(texture, buffer);
     DrawTexturePro(texture, texture_rect, screen_rect, (Vector2) {0, 0}, 0, (Color) {67, 82, 61, 255});
-
-    if (check)
-    {
-        if (!IsAudioStreamPlaying(stream))
-        {
-            ResumeAudioStream(stream);
-        }
-    }
-    else
-    {
-        if (IsAudioStreamPlaying(stream))
-        {
-            PauseAudioStream(stream);
-        }
-    }
 }

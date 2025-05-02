@@ -1,5 +1,4 @@
-#ifndef CPU_H
-#define CPU_H
+#pragma once
 
 #include "memory.h"
 #include "platform.h"
@@ -9,6 +8,11 @@ struct CPU
 {
     uint16_t PC;
     uint8_t SP;
+    
+    float counter = 0;
+    bool Executed = false;
+
+    float startCycles;
 
     uint8_t Registers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     uint8_t WordLen[20] = {3, 3, 2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3};
@@ -34,18 +38,18 @@ struct CPU
     static constexpr uint8_t INS_ILOAD = 0x12;
     static constexpr uint8_t INS_ISTORE = 0x13;
 
+    uint8_t Note;
+
     float cyclesToExecute;
 
     void Reset(Memory&, Memory&, System&, Platform&);
 
-    uint8_t FetchByte (float&, Memory&);
+    uint8_t FetchOpcodeHyte (float&, Memory&);
 
-    uint8_t FetchByteRAM (float&, Memory&, uint8_t);
+    uint8_t FetchHyte (float&, Memory&, uint16_t);
 
-    void StoreByteRAM (float&, Memory&, uint8_t, uint8_t);
+    void StoreHyte (float&, Memory&, uint16_t, uint8_t);
 
-    void Execute (float, Memory&, Memory&, System&, Platform&);
+    void Execute (float, Memory&, Memory&, System&, Platform&, bool Single);
     
 };
-
-#endif

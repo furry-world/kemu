@@ -1,6 +1,3 @@
-#ifndef MEMORY_H
-#define MEMORY_H
-
 #pragma once
 
 #include <cstdint>
@@ -43,5 +40,3 @@ struct System
     void Update();
     bool flag;
 };
-
-#endif

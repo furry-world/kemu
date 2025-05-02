@@ -37,7 +37,7 @@ void Memory::LoadFile(char const* FileName)
 		file.read(buffer, size);
 		file.close();
 
-        for (long i = 0; i < MAX_MEM; ++i)
+        for (long i = 0; i < size; ++i)
 		{
 			Mem[i] = buffer[i];
 		}
