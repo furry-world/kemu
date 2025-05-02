@@ -3,6 +3,9 @@
 #include "memory.h"
 #include "platform.h"
 #include "ctime"
+#include <string>
+#include <format>
+
 
 struct CPU
 {
@@ -51,5 +54,7 @@ struct CPU
     void StoreHyte (float&, Memory&, uint16_t, uint8_t);
 
     void Execute (float, Memory&, Memory&, System&, Platform&, bool Single);
+
+    std::string Disassemble (int InstructionCount, Memory&);
     
 };

@@ -124,8 +124,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     if (Registers[(value1 & 0b00111000) >> 3] == value2 & 0b00111111)
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
-                        PC += WordLen[In]-1;
-                        cyclesToExecute -= WordLen[In];
+                        if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
+                        {
+                            PC += 2;
+                            cyclesToExecute -= 3;
+                        }
+                        else
+                        {
+                            PC += WordLen[In]-1;
+                            cyclesToExecute -= WordLen[In];
+                        }
                     }
                 }
                 else
@@ -133,8 +141,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     if (Registers[(value1 & 0b00111000) >> 3] == CPU::FetchHyte(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2))
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
-                        PC += WordLen[In]-1;
-                        cyclesToExecute -= WordLen[In];
+                        if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
+                        {
+                            PC += 2;
+                            cyclesToExecute -= 3;
+                        }
+                        else
+                        {
+                            PC += WordLen[In]-1;
+                            cyclesToExecute -= WordLen[In];
+                        }
                     }
                 }
                 cyclesToExecute--;
@@ -150,8 +166,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     if (Registers[(value1 & 0b00111000) >> 3] != value2 & 0b00111111 )
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
-                        PC += WordLen[In]-1;
-                        cyclesToExecute -= WordLen[In];
+                        if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
+                        {
+                            PC += 2;
+                            cyclesToExecute -= 3;
+                        }
+                        else
+                        {
+                            PC += WordLen[In]-1;
+                            cyclesToExecute -= WordLen[In];
+                        }
                     }
                 }
                 else
@@ -159,8 +183,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     if (Registers[(value1 & 0b00111000) >> 3] != CPU::FetchHyte(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2))
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
-                        PC += WordLen[In]-1;
-                        cyclesToExecute -= WordLen[In];
+                        if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
+                        {
+                            PC += 2;
+                            cyclesToExecute -= 3;
+                        }
+                        else
+                        {
+                            PC += WordLen[In]-1;
+                            cyclesToExecute -= WordLen[In];
+                        }
                     }
                 }
                 cyclesToExecute--;
@@ -298,8 +330,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 if (Registers[(value1 & 0b00111000) >> 3] == Registers[value1 & 0b00000111])
                 {
                     uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
-                    PC += WordLen[In]-1;
-                    cyclesToExecute -= WordLen[In];
+                    if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
+                        {
+                            PC += 2;
+                            cyclesToExecute -= 3;
+                        }
+                        else
+                        {
+                            PC += WordLen[In]-1;
+                            cyclesToExecute -= WordLen[In];
+                        }
                 }
                 cyclesToExecute--;
             } break;
@@ -310,8 +350,16 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 if (Registers[(value1 & 0b00111000) >> 3] != Registers[value1 & 0b00000111])
                 {
                     uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
-                    PC += WordLen[In]-1;
-                    cyclesToExecute -= WordLen[In];
+                    if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
+                        {
+                            PC += 2;
+                            cyclesToExecute -= 3;
+                        }
+                        else
+                        {
+                            PC += WordLen[In]-1;
+                            cyclesToExecute -= WordLen[In];
+                        }
                 }
                 cyclesToExecute--;
             } break;
@@ -435,7 +483,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
 
                     if (rom.type == true) CPU::StoreHyte(cyclesToExecute, rom, address, Registers[Ins & 0b00000111]);
 
-                    cyclesToExecute -= 2;;
+                    cyclesToExecute -= 2;
                 }
                 else if ((Ins & 0b00111000) >> 3 == 6)
                 {
@@ -543,4 +591,381 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             counter -= 20000;
         }
     }
+}
+
+std::string CPU::Disassemble (int InstructionCount, Memory& rom)
+{
+    uint16_t vPC = PC;
+
+    std::string str = "> ";
+
+    for (int i = 0; i < InstructionCount; i++)
+    {
+        uint8_t Ins = rom[vPC];
+
+        switch(Ins)
+        {
+            case INS_CALL:
+            {
+                uint16_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+                strIns = std::format("CALL {}\n", (value1 << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+
+            } break;
+
+            case INS_RET:
+            {
+                
+                std::string strIns = "RETURN\n";
+                str += strIns;
+
+                vPC++ ;
+
+            } break;
+
+            case INS_JMP:
+            {
+                uint16_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+                strIns = std::format("JUMP {}\n", (value1 << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+            } break;
+
+            case INS_EQU:
+            {
+                uint16_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                if ((value1 & 0b00000100) >> 2 == 0)
+                {
+                    std::string strIns;
+                    strIns = std::format("EQUAL {} #{}\n", char(65 + (value1>>3)), value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else
+                {
+                    std::string strIns;
+                    strIns = std::format("EQUAL {} {}\n", char(65 + (value1>>3)), (value1 << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+            } break;
+
+            case INS_NEQU:
+            {
+                uint16_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                if ((value1 & 0b00000100) >> 2 == 0)
+                {
+                    std::string strIns;
+                    strIns = std::format("NOTEQUAL {} #{}\n", char(65 + (value1>>3)), value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else
+                {
+                    std::string strIns;
+                    strIns = std::format("NOTEQUAL {} {}\n", char(65 + (value1>>3)), (value1 << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+            } break;
+
+            case INS_RJMP:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns = std::format("RJUMP {}\n", value1);
+
+                str += strIns;
+
+                vPC += 2;
+
+            } break;
+
+            case INS_ADD:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns;
+
+                strIns = std::format("ADD {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_SUB:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns;
+
+                strIns = std::format("SUBTRACT {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+                
+                vPC += 2;
+            } break;
+            
+            case INS_LOAD:
+            {
+                uint8_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                if ((value1 & 0b00000100) >> 2 == 0)
+                {
+                    std::string strIns;
+
+                    strIns = std::format("LOAD {} #{}\n", char(65 + (value1>>3)), value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else
+                {
+                    std::string strIns;
+
+                    strIns = std::format("LOAD {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+            } break;
+
+            case INS_STORE:
+            {
+                uint8_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+
+                strIns = std::format("STORE {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+                
+            } break;
+
+            case INS_RLOAD:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns;
+
+                strIns = std::format("LOAD {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_REQU:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns;
+
+                strIns = std::format("EQUAL {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_NREQU:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns;
+
+                strIns = std::format("NOTEQUAL {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_OR:
+            {
+                uint8_t value1 = rom[vPC+1];
+
+                std::string strIns;
+
+                strIns = std::format("OR {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_AND:
+            {
+                uint8_t value1 = rom[vPC+1];
+                
+                std::string strIns;
+
+                strIns = std::format("AND {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_XOR:
+            {
+                uint8_t value1 = rom[vPC+1];
+                
+                std::string strIns;
+
+                strIns = std::format("XOR {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_SHIFTL:
+            {
+                uint8_t value1 = rom[vPC+1];
+                
+                std::string strIns;
+
+                strIns = std::format("SHIFTL {}\n", char(65 + (value1>>3)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_SHIFTR:
+            {
+                uint8_t value1 = rom[vPC+1];
+                
+                std::string strIns;
+
+                strIns = std::format("SHIFTR {}\n", char(65 + (value1>>3)));
+
+                str += strIns;
+
+                vPC += 2;
+            } break;
+
+            case INS_ILOAD:
+            {
+                uint8_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+
+                strIns = std::format("ILOAD {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+            } break;
+
+            case INS_ISTORE:
+            {
+                uint8_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+
+                strIns = std::format("ISTORE {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+            } break;
+
+            default:
+            {
+                if ((Ins & 0b00111000) >> 3 == 4)
+                {
+                    uint16_t value1 = rom[vPC+1];
+                    uint8_t value2 = rom[vPC+2];
+
+                    std::string strIns;
+
+                    strIns = std::format("PLOAD {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else if ((Ins & 0b00111000) >> 3 == 5)
+                {
+                    uint16_t value1 = rom[vPC+1];
+                    uint8_t value2 = rom[vPC+2];
+
+                    std::string strIns;
+
+                    strIns = std::format("PSTORE {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else if ((Ins & 0b00111000) >> 3 == 6)
+                {
+                    uint16_t value1 = rom[vPC+1];
+                    uint8_t value2 = rom[vPC+2];
+
+                    std::string strIns;
+
+                    strIns = std::format("IPLOAD {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else if ((Ins & 0b00111000) >> 3 == 7)
+                {
+                    uint16_t value1 = rom[vPC+1];
+                    uint8_t value2 = rom[vPC+2];
+
+                    std::string strIns;
+
+                    strIns = std::format("IPSTORE {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+
+                    str += strIns;
+
+                    vPC += 3;
+                }
+                else
+                {
+                    std::string strIns = "<UNKNOWN>\n";
+                    str += strIns;
+                    vPC++;
+                }
+            }
+        }
+    }
+    return str;
 }

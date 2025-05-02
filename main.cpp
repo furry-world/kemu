@@ -7,6 +7,7 @@
 
 bool preferences = false;
 bool debugFlag = false;
+bool about = false;
 int currentSelection = 0;
 bool isPaused = false;
 bool isLocked = true;
@@ -59,7 +60,10 @@ int main() {
             }
             else
             {
-                if (IsKeyPressed(KEY_ENTER)) cpu.Execute(0, rom, ram, system, platform, true);
+                if (IsKeyPressed(KEY_ENTER)) 
+                {
+                    cpu.Execute(0, rom, ram, system, platform, true);
+                }
             }
         }
 
@@ -73,6 +77,8 @@ int main() {
             {
                 cpu.Registers[i] = 0;
             }
+
+            system.Initialize();
 
             ram.Initialize(0);
 
@@ -127,6 +133,8 @@ int main() {
             GuiPanel((Rectangle) {0, 440, 160, 440}, "RAM");
             GuiPanel((Rectangle) {160, 440, 1040, 440}, "ROM");
 
+            DrawText(cpu.Disassemble(10, rom).c_str(), 970, 100, 20, DARKGRAY);
+
             char states[256];
             sprintf(states, "PC: %o\nSP: %o\nA: %o\nB: %o\nC: %o\nD: %o\nE: %o\nF: %o\nG: %o\nH: %o\nNote: %o\nInput: %o\nTimer: %o", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, ram[239], ram[238]);
             DrawText(states, 610, 40, 20, DARKGRAY);
@@ -149,15 +157,27 @@ int main() {
             for (int y = 0; y < 32; y++)
             {
                 char hex[4];
-                snprintf(hex, 4, "%x", y*32 + currentSelection * 1024);
+                snprintf(hex, 4, "%X", y*32 + currentSelection * 1024);
 
                 DrawText(hex, 250,  500 + y * y_spacing, 10, DARKGRAY);
 
                 for (int x = 0; x < 32; x++)
                 {
                     char oct[4];
-                    snprintf(oct, 4, "%o", rom[(currentSelection * 1024) + (y*32+x)]);
-                    DrawText(oct, 300 + x * x_spacing,  500 + y * y_spacing, 10, DARKGRAY);
+
+                    Color tCol;
+
+                    if (cpu.PC == currentSelection * 1024 + (y*32+x))
+                    {
+                        tCol = RED;
+                    }
+                    else
+                    {
+                        tCol = DARKGRAY;
+                    }
+
+                    snprintf(oct, 4, "%o", rom[currentSelection * 1024 + (y*32+x)]);
+                    DrawText(oct, 300 + x * x_spacing,  500 + y * y_spacing, 10, tCol);
                 }
             }
         }
@@ -169,7 +189,14 @@ int main() {
             }
         }
 
-        GuiButton((Rectangle) {450, 0, 150, 40}, "About");
+        if (GuiButton((Rectangle) {450, 0, 150, 40}, "About")) about = !about;
+
+        if (about)
+        {
+            int result = GuiPanel((Rectangle){125, 150, 350, 150}, "About");
+
+            DrawText("KEMU - a Game N' Wave emulator\nMade by Maya Trimino and \nRea Irena Schindler\nusing Raylib and Raygui", 130, 185, 20, DARKGRAY);
+        }
 
         GuiWindowFileDialog(&fileDialogState);
 
