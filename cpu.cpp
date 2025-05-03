@@ -63,10 +63,10 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                 uint8_t value2 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
 
-                CPU::StoreHyte(cyclesToExecute, ram, 240 + SP, PC & 0b0000000000111111);
-                CPU::StoreHyte(cyclesToExecute, ram, 240 + SP + 1, (PC & 0b0000111111000000) >> 6);
+                CPU::StoreHyte(cyclesToExecute, ram, 240 + (SP * 2), PC & 0b0000000000111111);
+                CPU::StoreHyte(cyclesToExecute, ram, 240 + (SP * 2) + 1, (PC & 0b0000111111000000) >> 6);
 
-                if (SP < 15)
+                if (SP < 8)
                 {
                     SP++;    
                 }
@@ -83,14 +83,6 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
 
             case INS_RET:
             {
-                uint8_t Value1 = CPU::FetchHyte(cyclesToExecute, ram, 240 + SP);
-                uint8_t Value2 = CPU::FetchHyte(cyclesToExecute, ram, 240 + SP + 1);
-
-                PC = (Value1 << 6) + Value2;
-
-                CPU::StoreHyte(cyclesToExecute, ram, 240 + SP, 0);
-                CPU::StoreHyte(cyclesToExecute, ram, 240 + SP + 1, 0);
-
                 if (SP > 0)
                 {
                     SP--;    
@@ -99,6 +91,14 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 {
                     exit(0);
                 }
+
+                uint8_t Value1 = CPU::FetchHyte(cyclesToExecute, ram, 240 + (SP * 2));
+                uint8_t Value2 = CPU::FetchHyte(cyclesToExecute, ram, 240 + (SP * 2) + 1);
+
+                PC = (Value2 << 6) + Value1;
+
+                ram[240 + (SP * 2) + 2] = 0;
+                ram[240 + (SP * 2) + 3] = 0;
 
                 cyclesToExecute--;
 
@@ -395,7 +395,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             {
                 uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
 
-                Registers[7] = Registers[(value1 & 0b00111000) >> 3] & 0b00100000;
+                Registers[7] = (Registers[(value1 & 0b00111000) >> 3] & 0b00100000) >> 5;
 
                 Registers[(value1 & 0b00111000) >> 3] = (Registers[(value1 & 0b00111000) >> 3] << 1) & 0b00111111;
 
@@ -420,11 +420,11 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
 
                 if ((value1 & 0b00111000) >> 3 != 7)
                 {
-                    Registers[(value1 & 0b00111000) >> 3] = CPU::FetchHyte(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2 + Registers[3]);
+                    Registers[(value1 & 0b00111000) >> 3] = CPU::FetchHyte(cyclesToExecute, ram, (((value1 & 0b00000011) << 6) + value2 + Registers[3]) & 0b00111111);
                 }
                 else
                 {
-                    Registers[(value1 & 0b00111000) >> 3] = CPU::FetchHyte(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2 + Registers[3]) & 0b00000001;
+                    Registers[(value1 & 0b00111000) >> 3] = CPU::FetchHyte(cyclesToExecute, ram, (((value1 & 0b00000011) << 6) + value2 + Registers[3]) & 0b00111111) & 0b00000001;
                 }
 
                 if ((value1 & 0b00111000) >> 3 == 6)
@@ -440,7 +440,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                 uint8_t value2 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
 
-                StoreHyte(cyclesToExecute, ram, ((value1 & 0b00000011) << 6) + value2 + Registers[3], Registers[(value1 & 0b00111000) >> 3]);
+                StoreHyte(cyclesToExecute, ram, (((value1 & 0b00000011) << 6) + value2 + Registers[3]) & 0b00111111, Registers[(value1 & 0b00111000) >> 3]);
 
                 cyclesToExecute -= 2;
             } break;
@@ -495,11 +495,11 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     
                     if (Registers[Ins & 0b00000111] != 7)
                         {
-                            Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom,address + Registers[3]);
+                            Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b00111111);
                         }
                         else
                         {
-                            Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, address + Registers[3]) & 0b00000001;
+                            Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b00111111) & 0b00000001;
                         }
 
                         if ((value1 & 0b00111000) >> 3 == 6)
@@ -517,7 +517,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                     uint16_t address = value1;
                     address = (address << 6) + value2;
 
-                    if (rom.type == true) CPU::StoreHyte(cyclesToExecute, rom, address + Registers[3], Registers[Ins & 0b00000111]);
+                    if (rom.type == true) CPU::StoreHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b00111111, Registers[Ins & 0b00000111]);
 
                     cyclesToExecute -= 3;
                 }
