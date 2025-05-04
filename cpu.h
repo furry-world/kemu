@@ -53,7 +53,7 @@ struct CPU
 
     void StoreHyte (float&, Memory&, uint16_t, uint8_t);
 
-    void Execute (float, Memory&, Memory&, System&, Platform&, bool Single);
+    int Execute (float, Memory&, Memory&, System&, Platform&, bool Single);
 
     std::string Disassemble (int InstructionCount, Memory&);
     

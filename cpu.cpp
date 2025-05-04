@@ -45,7 +45,7 @@ void CPU::StoreHyte (float& Cycles, Memory& memory, uint16_t address, uint8_t va
     memory[address] = value;
 }
 
-void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platform& interface, bool Single)
+int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platform& interface, bool Single)
 {
     cyclesToExecute += Cycles;
     Executed = false;
@@ -72,7 +72,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 }
                 else
                 {
-                    exit(0);
+                    return 2;
                 }
 
                 PC = (value1 << 6) + value2;
@@ -89,7 +89,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 }
                 else
                 {
-                    exit(0);
+                    return 3;
                 }
 
                 uint8_t Value1 = CPU::FetchHyte(cyclesToExecute, ram, 240 + (SP * 2));
@@ -523,8 +523,7 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
                 }
                 else
                 {
-                    printf("instruction not handled %u at PC address %u\n", Ins, PC);
-                    exit(0);
+                    return 1;
                 }
             }
         }
@@ -591,13 +590,14 @@ void CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platf
             counter -= 20000;
         }
     }
+    return 0;
 }
 
 std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 {
     uint16_t vPC = PC;
 
-    std::string str = "> ";
+    std::string str = ">";
 
     for (int i = 0; i < InstructionCount; i++)
     {
@@ -611,7 +611,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 uint8_t value2 = rom[vPC+2];
 
                 std::string strIns;
-                strIns = std::format("CALL {}\n", (value1 << 6) + value2);
+                strIns = std::format("CALL ${:X}\n", (value1 << 6) + value2);
 
                 str += strIns;
 
@@ -635,7 +635,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 uint8_t value2 = rom[vPC+2];
 
                 std::string strIns;
-                strIns = std::format("JUMP {}\n", (value1 << 6) + value2);
+                strIns = std::format("JUMP ${:X}\n", (value1 << 6) + value2);
 
                 str += strIns;
 
@@ -650,7 +650,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 if ((value1 & 0b00000100) >> 2 == 0)
                 {
                     std::string strIns;
-                    strIns = std::format("EQUAL {} #{}\n", char(65 + (value1>>3)), value2);
+                    strIns = std::format("EQUAL {} #!{:o}\n", char(65 + (value1>>3)), value2);
 
                     str += strIns;
 
@@ -659,7 +659,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 else
                 {
                     std::string strIns;
-                    strIns = std::format("EQUAL {} {}\n", char(65 + (value1>>3)), (value1 << 6) + value2);
+                    strIns = std::format("EQUAL {} ${:X}\n", char(65 + (value1>>3)), (value1 << 6) + value2);
 
                     str += strIns;
 
@@ -675,7 +675,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 if ((value1 & 0b00000100) >> 2 == 0)
                 {
                     std::string strIns;
-                    strIns = std::format("NOTEQUAL {} #{}\n", char(65 + (value1>>3)), value2);
+                    strIns = std::format("NOTEQUAL {} #!{:o}\n", char(65 + (value1>>3)), value2);
 
                     str += strIns;
 
@@ -684,7 +684,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 else
                 {
                     std::string strIns;
-                    strIns = std::format("NOTEQUAL {} {}\n", char(65 + (value1>>3)), (value1 << 6) + value2);
+                    strIns = std::format("NOTEQUAL {} ${:X}\n", char(65 + (value1>>3)), (value1 << 6) + value2);
 
                     str += strIns;
 
@@ -696,7 +696,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
             {
                 uint8_t value1 = rom[vPC+1];
 
-                std::string strIns = std::format("RJUMP {}\n", value1);
+                std::string strIns = std::format("RJUMP !{:o}\n", value1);
 
                 str += strIns;
 
@@ -739,7 +739,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 {
                     std::string strIns;
 
-                    strIns = std::format("LOAD {} #{}\n", char(65 + (value1>>3)), value2);
+                    strIns = std::format("LOAD {} #!{:o}\n", char(65 + (value1>>3)), value2);
 
                     str += strIns;
 
@@ -749,7 +749,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 {
                     std::string strIns;
 
-                    strIns = std::format("LOAD {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+                    strIns = std::format("LOAD {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
 
                     str += strIns;
 
@@ -764,7 +764,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                 std::string strIns;
 
-                strIns = std::format("STORE {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+                strIns = std::format("STORE {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
 
                 str += strIns;
 
@@ -883,7 +883,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                 std::string strIns;
 
-                strIns = std::format("ILOAD {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+                strIns = std::format("ILOAD {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
 
                 str += strIns;
 
@@ -897,7 +897,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                 std::string strIns;
 
-                strIns = std::format("ISTORE {} {}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+                strIns = std::format("ISTORE {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
 
                 str += strIns;
 
@@ -913,7 +913,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                     std::string strIns;
 
-                    strIns = std::format("PLOAD {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+                    strIns = std::format("PLOAD {} ${:X}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
 
                     str += strIns;
 
@@ -926,7 +926,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                     std::string strIns;
 
-                    strIns = std::format("PSTORE {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+                    strIns = std::format("PSTORE {} ${:X}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
 
                     str += strIns;
 
@@ -939,7 +939,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                     std::string strIns;
 
-                    strIns = std::format("IPLOAD {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+                    strIns = std::format("IPLOAD {} ${:X}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
 
                     str += strIns;
 
@@ -952,7 +952,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
                     std::string strIns;
 
-                    strIns = std::format("IPSTORE {} {}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
+                    strIns = std::format("IPSTORE {} ${:X}\n", char(65 + (Ins & 0b00000111)), (value1 << 6) + value2);
 
                     str += strIns;
 
@@ -960,7 +960,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 }
                 else
                 {
-                    std::string strIns = "<UNKNOWN>\n";
+                    std::string strIns = "??\n";
                     str += strIns;
                     vPC++;
                 }

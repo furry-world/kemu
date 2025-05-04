@@ -8,16 +8,21 @@
 bool preferences = false;
 bool debugFlag = false;
 bool about = false;
-int currentSelection = 0;
 bool isPaused = false;
 bool isLocked = true;
+bool errorMsg = false;
 
-const int x_spacing = 20;
-const int y_spacing = 10;
+int currentSelection = 0;
+int error;
+
+const float x_spacing = 19;
+const float y_spacing = 10;
 
 int main() {
 
     Platform platform("kemu - Game N' Wave emulator", 600, 440, 60, 40);
+
+    Font font = LoadFont("C64_Pro_Mono-STYLE.ttf");
 
     GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
 
@@ -56,13 +61,13 @@ int main() {
         {
             if (!isPaused)
             {
-                cpu.Execute(GetFrameTime() * 1200000.00, rom, ram, system, platform, false);
+                error = cpu.Execute(GetFrameTime() * 1200000.00, rom, ram, system, platform, false);
             }
             else
             {
                 if (IsKeyPressed(KEY_ENTER)) 
                 {
-                    cpu.Execute(0, rom, ram, system, platform, true);
+                    error = cpu.Execute(0, rom, ram, system, platform, true);
                 }
             }
         }
@@ -79,8 +84,6 @@ int main() {
             }
 
             system.Initialize();
-
-            ram.Initialize(0);
 
             cpu.counter = 0;
 
@@ -133,11 +136,11 @@ int main() {
             GuiPanel((Rectangle) {0, 440, 160, 440}, "RAM");
             GuiPanel((Rectangle) {160, 440, 1040, 440}, "ROM");
 
-            DrawText(cpu.Disassemble(10, rom).c_str(), 970, 100, 20, DARKGRAY);
+            DrawTextEx(font, cpu.Disassemble(10, rom).c_str(), (Vector2) {925, 100}, 16, 0, DARKGRAY);
 
             char states[256];
-            sprintf(states, "PC: %o\nSP: %o\nA: %o\nB: %o\nC: %o\nD: %o\nE: %o\nF: %o\nG: %o\nH: %o\nNote: %o\nInput: %o\nTimer: %o", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, ram[239], ram[238]);
-            DrawText(states, 610, 40, 20, DARKGRAY);
+            sprintf(states, "PC: %02X\nSP: %02o\nA: %02o\nB: %02o\nC: %02o\nD: %02o\nE: %02o\nF: %02o\nG: %02o\nH: %02o\nNote: %02o\nInput: %02o\nTimer: %02o", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, ram[239], ram[238]);
+            DrawTextEx(font, states, (Vector2) {610, 40}, 16, 0, DARKGRAY);
 
             if (GuiButton((Rectangle) {1000, 600, 150, 40}, "Slice 1")) currentSelection = 0;
             if (GuiButton((Rectangle) {1000, 640, 150, 40}, "Slice 2")) currentSelection = 1;
@@ -149,17 +152,17 @@ int main() {
                 for (int y = 0; y < 32; y++)
                 {
                     char oct[4];
-                    snprintf(oct, 4, "%o", ram[(y*8+x)]);
-                    DrawText(oct, 7 + x * x_spacing, 500 + y * y_spacing, 10, DARKGRAY);
+                    snprintf(oct, 4, "%02o", ram[(y*8+x)]);
+                    DrawTextEx(font, oct, (Vector2) {5 + x * x_spacing, 500 + y * y_spacing}, 8, 0, DARKGRAY);
                 }
             }
 
             for (int y = 0; y < 32; y++)
             {
                 char hex[4];
-                snprintf(hex, 4, "%X", y*32 + currentSelection * 1024);
+                snprintf(hex, 4, "%02X", y*32 + currentSelection * 1024);
 
-                DrawText(hex, 250,  500 + y * y_spacing, 10, DARKGRAY);
+                DrawTextEx(font, hex, (Vector2) {250,  500 + y * y_spacing}, 8, 0, DARKGRAY);
 
                 for (int x = 0; x < 32; x++)
                 {
@@ -176,8 +179,8 @@ int main() {
                         tCol = DARKGRAY;
                     }
 
-                    snprintf(oct, 4, "%o", rom[currentSelection * 1024 + (y*32+x)]);
-                    DrawText(oct, 300 + x * x_spacing,  500 + y * y_spacing, 10, tCol);
+                    snprintf(oct, 4, "%02o", rom[currentSelection * 1024 + (y*32+x)]);
+                    DrawTextEx(font, oct, (Vector2) {300 + x * x_spacing,  500 + y * y_spacing}, 8, 0, tCol);
                 }
             }
         }
@@ -196,6 +199,40 @@ int main() {
             int result = GuiPanel((Rectangle){125, 150, 350, 150}, "About");
 
             DrawText("KEMU - a Game N' Wave emulator\nMade by Maya Trimino and \nRea Irena Schindler\nusing Raylib and Raygui", 130, 185, 20, DARKGRAY);
+        }
+
+        if (error != 0 && !errorMsg)
+        {
+            cpu.Reset(ram, rom, system, platform);
+            isLocked = true;
+            errorMsg = true;
+        }
+
+        if (errorMsg)
+        {
+            int result;
+
+            if (error = 1)
+            {
+            result = GuiMessageBox((Rectangle){150, 190, 300, 100},
+                    "Error!", "Unknown instruction!", "OK");
+            }
+            else if (error = 2)
+            {
+                result = GuiMessageBox((Rectangle){150, 190, 300, 100},
+                    "Error!", "Stack pointer overflow!", "OK");
+            }
+            else
+            {
+                result = GuiMessageBox((Rectangle){150, 190, 300, 100},
+                    "Error!", "Stack pointer underflow!", "OK");
+            }
+
+            if (result >= 0) 
+            {
+                error = 0;
+                errorMsg = false;
+            }
         }
 
         GuiWindowFileDialog(&fileDialogState);
