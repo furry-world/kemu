@@ -97,8 +97,8 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
                 PC = (Value2 << 6) + Value1;
 
-                ram[240 + (SP * 2) + 2] = 0;
-                ram[240 + (SP * 2) + 3] = 0;
+                ram[240 + (SP * 2)] = 0;
+                ram[240 + (SP * 2) + 1] = 0;
 
                 cyclesToExecute--;
 
