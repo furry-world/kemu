@@ -121,7 +121,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
                 if ((value1 & 0b00000100) >> 2 == 0)
                 {
-                    if (Registers[(value1 & 0b00111000) >> 3] == value2 & 0b00111111)
+                    if (Registers[(value1 & 0b00111000) >> 3] == (value2 & 0b00111111))
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                         if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
@@ -163,7 +163,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
                 if ((value1 & 0b00000100) >> 2 == 0)
                 {
-                    if (Registers[(value1 & 0b00111000) >> 3] != value2 & 0b00111111 )
+                    if (Registers[(value1 & 0b00111000) >> 3] != (value2 & 0b00111111))
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                         if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
