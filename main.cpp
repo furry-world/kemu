@@ -34,8 +34,6 @@ int main() {
 
     cpu.Reset(ram, rom, system, platform);
 
-    SetTargetFPS(60);
-
     GuiWindowFileDialogState fileDialogState = InitGuiWindowFileDialog(GetWorkingDirectory());
 
     while(!WindowShouldClose())
