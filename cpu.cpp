@@ -68,7 +68,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
                 if (SP < 8)
                 {
-                    SP++;    
+                    SP++;
                 }
                 else
                 {
@@ -85,7 +85,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
             {
                 if (SP > 0)
                 {
-                    SP--;    
+                    SP--;
                 }
                 else
                 {
@@ -161,8 +161,8 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                 uint8_t value2 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
 
-                if ((value1 & 0b00000100) >> 2 == 0)
-                {
+                if ((value1 & 0b00000100) >> 2 == 0) {
+
                     if (Registers[(value1 & 0b00111000) >> 3] != (value2 & 0b00111111))
                     {
                         uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
@@ -260,7 +260,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
                 cyclesToExecute--;
             } break;
-            
+
             case INS_LOAD:
             {
                 uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
@@ -294,7 +294,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 if ((value1 & 0b00111000) >> 3 == 6)
                 {
                     system.flag = 1;
-                } 
+                }
 
                 cyclesToExecute--;
             } break;
@@ -318,7 +318,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 if ((value1 & 0b00111000) >> 3 == 6)
                 {
                     system.flag = 1;
-                } 
+                }
 
                 cyclesToExecute--;
             } break;
@@ -331,15 +331,15 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 {
                     uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                     if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
-                        {
-                            PC += 2;
-                            cyclesToExecute -= 3;
-                        }
-                        else
-                        {
-                            PC += WordLen[In]-1;
-                            cyclesToExecute -= WordLen[In];
-                        }
+                    {
+                        PC += 2;
+                        cyclesToExecute -= 3;
+                    }
+                    else
+                    {
+                        PC += WordLen[In]-1;
+                        cyclesToExecute -= WordLen[In];
+                    }
                 }
                 cyclesToExecute--;
             } break;
@@ -351,15 +351,15 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 {
                     uint8_t In = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
                     if ((In & 0b00111000) >> 3 == 4 || (In & 0b00111000) >> 3 == 5 || (In & 0b00111000) >> 3 == 6 || (In & 0b00111000) >> 3 == 7)
-                        {
-                            PC += 2;
-                            cyclesToExecute -= 3;
-                        }
-                        else
-                        {
-                            PC += WordLen[In]-1;
-                            cyclesToExecute -= WordLen[In];
-                        }
+                    {
+                        PC += 2;
+                        cyclesToExecute -= 3;
+                    }
+                    else
+                    {
+                        PC += WordLen[In]-1;
+                        cyclesToExecute -= WordLen[In];
+                    }
                 }
                 cyclesToExecute--;
             } break;
@@ -430,7 +430,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 if ((value1 & 0b00111000) >> 3 == 6)
                 {
                     system.flag = 1;
-                } 
+                }
 
                 cyclesToExecute -= 2;
             } break;
@@ -467,7 +467,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                     if ((value1 & 0b00111000) >> 3 == 6)
                     {
                         system.flag = 1;
-                    } 
+                    }
 
                     cyclesToExecute--;
                 }
@@ -492,20 +492,20 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
                     uint16_t address = value1;
                     address = (address << 6) + value2;
-                    
-                    if (Registers[Ins & 0b00000111] != 7)
-                        {
-                            Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b0000111111111111);
-                        }
-                        else
-                        {
-                            Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b0000111111111111) & 0b00000001;
-                        }
 
-                        if ((value1 & 0b00111000) >> 3 == 6)
-                        {
-                            system.flag = 1;
-                        } 
+                    if (Registers[Ins & 0b00000111] != 7)
+                    {
+                        Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b0000111111111111);
+                    }
+                    else
+                    {
+                        Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[3]) & 0b0000111111111111) & 0b00000001;
+                    }
+
+                    if ((value1 & 0b00111000) >> 3 == 6)
+                    {
+                        system.flag = 1;
+                    }
 
                     cyclesToExecute -= 2;
                 }
@@ -550,7 +550,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
             }
             system.flag = 0;
         }
-        
+
         ram[239] = 0;
 
         if (IsKeyDown(KEY_UP))
@@ -621,7 +621,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
 
             case INS_RET:
             {
-                
+
                 std::string strIns = "RETURN\n";
                 str += strIns;
 
@@ -726,10 +726,10 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 strIns = std::format("SUBTRACT {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
 
                 str += strIns;
-                
+
                 vPC += 2;
             } break;
-            
+
             case INS_LOAD:
             {
                 uint8_t value1 = rom[vPC+1];
@@ -769,7 +769,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 str += strIns;
 
                 vPC += 3;
-                
+
             } break;
 
             case INS_RLOAD:
@@ -827,7 +827,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
             case INS_AND:
             {
                 uint8_t value1 = rom[vPC+1];
-                
+
                 std::string strIns;
 
                 strIns = std::format("AND {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
@@ -840,7 +840,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
             case INS_XOR:
             {
                 uint8_t value1 = rom[vPC+1];
-                
+
                 std::string strIns;
 
                 strIns = std::format("XOR {} {}\n", char(65 + (value1>>3)), char(65 + (value1 & 0b00000111)));
@@ -853,7 +853,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
             case INS_SHIFTL:
             {
                 uint8_t value1 = rom[vPC+1];
-                
+
                 std::string strIns;
 
                 strIns = std::format("SHIFTL {}\n", char(65 + (value1>>3)));
@@ -866,7 +866,7 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
             case INS_SHIFTR:
             {
                 uint8_t value1 = rom[vPC+1];
-                
+
                 std::string strIns;
 
                 strIns = std::format("SHIFTR {}\n", char(65 + (value1>>3)));

@@ -63,7 +63,7 @@ int main() {
             }
             else
             {
-                if (IsKeyPressed(KEY_ENTER)) 
+                if (IsKeyPressed(KEY_ENTER))
                 {
                     error = cpu.Execute(0, rom, ram, system, platform, true);
                 }
@@ -102,7 +102,7 @@ int main() {
             isPaused = true;
             int result = GuiMessageBox((Rectangle){150, 190, 300, 100}, "Preferences", "Please select a mode", "ROM;RAM");
 
-            if (result == 1) 
+            if (result == 1)
             {
                 rom.type = false;
                 preferences = false;
@@ -226,7 +226,7 @@ int main() {
                     "Error!", "Stack pointer underflow!", "OK");
             }
 
-            if (result >= 0) 
+            if (result >= 0)
             {
                 error = 0;
                 errorMsg = false;
@@ -238,7 +238,7 @@ int main() {
         EndDrawing();
     }
 
-    CloseWindow(); 
+    CloseWindow();
 
     return 0;
 }

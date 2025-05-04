@@ -11,7 +11,7 @@ struct CPU
 {
     uint16_t PC;
     uint8_t SP;
-    
+
     float counter = 0;
     bool Executed = false;
 
@@ -56,5 +56,5 @@ struct CPU
     int Execute (float, Memory&, Memory&, System&, Platform&, bool Single);
 
     std::string Disassemble (int InstructionCount, Memory&);
-    
+
 };
