@@ -210,12 +210,12 @@ int main() {
         {
             int result;
 
-            if (error = 1)
+            if (error == 1)
             {
             result = GuiMessageBox((Rectangle){150, 190, 300, 100},
                     "Error!", "Unknown instruction!", "OK");
             }
-            else if (error = 2)
+            else if (error == 2)
             {
                 result = GuiMessageBox((Rectangle){150, 190, 300, 100},
                     "Error!", "Stack pointer overflow!", "OK");
