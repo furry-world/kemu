@@ -36,5 +36,7 @@ private:
 	AudioStream stream;
 };
 
-static std::queue<bool> que;
+static int indexRead = 0;
+static int indexWrite = 0;
+static bool que[1048576] = { };
 static float samplesToCollect = 0;

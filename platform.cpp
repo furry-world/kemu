@@ -28,7 +28,9 @@ Platform::~Platform()
 
 void Platform::Add(bool value)
 {
-    que.push(value);
+    que[indexWrite] = value;
+    indexWrite++;
+    if (indexWrite > 1048575) indexWrite = 0;
 }
 
 void Platform::AudioInputCallback(void *buffer, unsigned int frames)
@@ -36,13 +38,6 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
     short *d = (short *)buffer;
 
     int sum, samplesCollected;
-
-    if (que.size() < MINIMUM_BUFFER_LENGTH) {
-        for (unsigned int i = 0; i < frames; i++) d[i] = 0;
-        return;
-    }
-
-    while (que.size() > MAXIMUM_BUFFER_LENGTH) que.pop();
 
     for (unsigned int i = 0; i < frames; i++)
     {
@@ -55,11 +50,12 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 
         while (samplesToCollect >= 1)
         {
-            if (que.empty()) d[i] = 0;
+            if (indexWrite == indexRead) d[i] = 0;
             else
             {
-                sum += que.front();
-                que.pop();
+                sum += que[indexRead];
+                indexRead++;
+                if (indexRead > 1048575) indexRead = 0;
                 samplesCollected++;
             }
             samplesToCollect--;
