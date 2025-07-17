@@ -8,9 +8,11 @@
 #include <cstdio>
 #include <iostream>
 
-#define MAX_SAMPLES               512
-#define MAX_SAMPLES_PER_UPDATE   4096
+#define MAX_SAMPLES             512
+#define MAX_SAMPLES_PER_UPDATE  4096
 #define MAX_SAMPLE_SIZE         32767
+#define MINIMUM_BUFFER_LENGTH 	256
+#define MAXIMUM_BUFFER_LENGTH	131072
 
 
 class Platform

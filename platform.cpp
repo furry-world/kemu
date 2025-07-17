@@ -15,7 +15,7 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
     stream = LoadAudioStream(44100, 16, 1);
     SetAudioStreamCallback(stream, AudioInputCallback);
-    // AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
+    AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
 
     PlayAudioStream(stream);
 }
@@ -36,6 +36,13 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
     short *d = (short *)buffer;
 
     int sum, samplesCollected;
+
+    if (que.size() < MINIMUM_BUFFER_LENGTH) {
+        for (unsigned int i = 0; i < frames; i++) d[i] = 0;
+        return;
+    }
+
+    while (que.size() > MAXIMUM_BUFFER_LENGTH) que.pop();
 
     for (unsigned int i = 0; i < frames; i++)
     {
