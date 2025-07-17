@@ -26,34 +26,39 @@ Platform::~Platform()
     CloseAudioDevice();
 }
 
-void Platform::SetFreq(float Value)
+void Platform::Add(bool value)
 {
-    Freq = Value;
+    que.push(value);
 }
 
 void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 {
-    const int submul = 50;
-    float incr = Freq/44100.0f;
-    float subincr = incr/submul;
     short *d = (short *)buffer;
 
-    float sum;
+    int sum, samplesCollected;
 
     for (unsigned int i = 0; i < frames; i++)
     {
-        if (Freq == 0) {d[i] = 0;}
-        else
+
+        samplesToCollect += 27.2108843537415;
+
+        sum = 0;
+
+        samplesCollected = 0;
+
+        while (samplesToCollect >= 1)
         {
-            sum = 0;
-            for (unsigned int j = 0; j < submul; j++)
+            if (que.empty()) d[i] = 0;
+            else
             {
-                sum += beepIdx < 0.5 ? 1 : -1;
-                beepIdx += subincr;
-                if (beepIdx > 1.0f) beepIdx -= 1.0f;
+                sum += que.front();
+                que.pop();
+                samplesCollected++;
             }
-            d[i] = (short)(MAX_SAMPLE_SIZE * (sum / submul) * 0.2);
+            samplesToCollect--;
         }
+        if (samplesCollected > 0) d[i] = short(MAX_SAMPLE_SIZE * (sum / samplesCollected) * 0.2);
+        else d[i] = 0;
     }
 }
 

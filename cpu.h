@@ -6,7 +6,6 @@
 #include <string>
 #include <format>
 
-
 struct CPU
 {
     uint16_t PC;
@@ -42,6 +41,12 @@ struct CPU
     static constexpr uint8_t INS_ISTORE = 0x13;
 
     uint8_t Note;
+
+    uint8_t NewNote;
+
+    bool HiLo;
+
+    unsigned int samplesGenerated;
 
     float cyclesToExecute;
 

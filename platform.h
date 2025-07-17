@@ -3,6 +3,10 @@
 #include <cstdint>
 #include "math.h"
 #include "raylib.h"
+#include <queue>
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
 
 #define MAX_SAMPLES               512
 #define MAX_SAMPLES_PER_UPDATE   4096
@@ -16,8 +20,7 @@ public:
 	Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
 	~Platform();
 	void Update(void const* buffer);
-	void SetFreq(float);
-
+	void Add(bool value);
 
 private:
 
@@ -31,6 +34,5 @@ private:
 	AudioStream stream;
 };
 
-static bool check = true;
-static float Freq;
-static float beepIdx = 0.0f;
+static std::queue<bool> que;
+static float samplesToCollect = 0;

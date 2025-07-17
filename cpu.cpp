@@ -19,8 +19,12 @@ void CPU::Reset(Memory& ram, Memory& rom, System& system, Platform& interface){
 
     cyclesToExecute = 0;
 
+    NewNote = 0;
     Note = 0;
-    interface.SetFreq(0);
+
+    samplesGenerated = 0;
+
+    HiLo = 0;
 }
 
 uint8_t CPU::FetchOpcodeHyte (float& Cycles, Memory& memory)
@@ -530,6 +534,37 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
 
         if (Single) Executed = !Executed;
 
+        float cyclesElapsed = startCycles - cyclesToExecute;
+
+        for (int samples = 0; samples < cyclesElapsed; samples++)
+        {
+            if (Note == 0)
+            {
+                interface.Add(0);
+            }
+            else
+            {
+                if (samplesGenerated >= system.GetSound(Note))
+                {
+                    samplesGenerated = 0;
+                    HiLo = !HiLo;
+                }
+
+            interface.Add(HiLo);
+            samplesGenerated++;
+            }
+        }
+        
+        Note = NewNote;
+
+        counter += cyclesElapsed;
+
+        if (counter >= 20000)
+        {
+            if (ram[238] > 0) ram[238]--;
+            counter -= 20000;
+        }
+
         if (system.flag == 1)
         {
             switch(Registers[6])
@@ -541,8 +576,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                     system.VideoApply(Registers[4], Registers[5], Registers[3]);
                     break;
                 case 2:
-                    interface.SetFreq(system.GetSound(Registers[5]));
-                    Note = Registers[5];
+                    NewNote = Registers[5];
                     break;
                 case 3:
                     system.VideoPixelOff(Registers[4], Registers[5]);
@@ -582,13 +616,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
         {
             ram[239] = ram[239] | 0b00000001;
         }
-        counter += startCycles - cyclesToExecute;
 
-        if (counter >= 20000)
-        {
-            if (ram[238] > 0) ram[238]--;
-            counter -= 20000;
-        }
     }
     return 0;
 }

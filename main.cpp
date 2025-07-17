@@ -84,9 +84,9 @@ int main() {
             system.Initialize();
 
             cpu.counter = 0;
-
+            
+            cpu.NewNote = 0;
             cpu.Note = 0;
-            platform.SetFreq(0);
         }
 
         system.Update();
