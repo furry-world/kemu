@@ -13,9 +13,12 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
 
     InitAudioDevice();
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
-    stream = LoadAudioStream(44100, 16, 1);
+    stream = LoadAudioStream(SAMPLE_RATE, BIT_DEPTH, 1);
     SetAudioStreamCallback(stream, AudioInputCallback);
-    AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
+    // AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
+
+    sum = 0;
+    samplesCollected = 0;
 
     PlayAudioStream(stream);
 }
@@ -28,47 +31,51 @@ Platform::~Platform()
 
 void Platform::Add(bool value)
 {
-    que[indexWrite] = value;
-    indexWrite++;
-    if (indexWrite > 1048575) indexWrite = 0;
+    if (samplesToCollect < 0)
+    {
+        // we have collected enough 1-bit samples for a real native sample,
+        // so let's generate one!
+        sum += value * (samplesToCollect + 1);
+        samplesCollected += samplesToCollect + 1;
+
+        float sample = sum / samplesCollected;
+        sample = short(MAX_SAMPLE_SIZE * sample * VOLUME_MULTIPLIER);
+        que[indexWrite] = sample;
+        indexWrite++;
+        if (indexWrite > BUFFER_LENGTH) indexWrite = 0;
+
+        samplesCollected = -samplesToCollect;
+        sum = value * samplesCollected;
+
+        samplesToCollect += 1200000.0 / SAMPLE_RATE;
+    }
+
+    sum += value;
+    samplesToCollect--;
+    samplesCollected++;
 }
 
 void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 {
     short *d = (short *)buffer;
 
-    int sum, samplesCollected;
-
     for (unsigned int i = 0; i < frames; i++)
     {
-
-        samplesToCollect += 27.2108843537415;
-
-        sum = 0;
-
-        samplesCollected = 0;
-
-        while (samplesToCollect >= 1)
-        {
-            if (indexWrite == indexRead) d[i] = 0;
-            else
-            {
-                sum += que[indexRead];
-                indexRead++;
-                if (indexRead > 1048575) indexRead = 0;
-                samplesCollected++;
-            }
-            samplesToCollect--;
+        if (indexRead == indexWrite) {
+            d[i] = 0;
+            continue;
         }
-        if (samplesCollected > 0) d[i] = short(MAX_SAMPLE_SIZE * (sum / (float)(samplesCollected)) * 0.2);
-        else d[i] = 0;
+
+        d[i] = que[indexRead];
+        indexRead++;
+        if (indexRead > BUFFER_LENGTH) indexRead = 0;
     }
 }
 
 void Platform::AudioProcessEffectLPF(void *buffer, unsigned int frames)
 {
     static float low[2] = { 0.0f, 0.0f };
-    static const float cutoff = 20000.0f / 44100.0f;
+    static const float cutoff = 2000.0f / SAMPLE_RATE;
     const float k = cutoff / (cutoff + 0.1591549431f);
 
     float *bufferData = (float *)buffer;
