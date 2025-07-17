@@ -37,10 +37,6 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 
     int sum, samplesCollected;
 
-    if (que.size() < MINIMUM_BUFFER_LENGTH) {
-        for (unsigned int i = 0; i < frames; i++) d[i] = 0;
-    }
-
     for (unsigned int i = 0; i < frames; i++)
     {
 
