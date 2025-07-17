@@ -11,9 +11,12 @@
 #define MAX_SAMPLES             512
 #define MAX_SAMPLES_PER_UPDATE  4096
 #define MAX_SAMPLE_SIZE         32767
-#define MINIMUM_BUFFER_LENGTH 	256
-#define MAXIMUM_BUFFER_LENGTH	131072
+#define BUFFER_LENGTH	        4096
 
+#define SAMPLE_RATE             44100
+#define BIT_DEPTH               16
+
+#define VOLUME_MULTIPLIER       0.2
 
 class Platform
 {
@@ -34,9 +37,12 @@ private:
 	Rectangle screen_rect;
 	Rectangle texture_rect;
 	AudioStream stream;
+
+    float sum;
+    int samplesCollected;
 };
 
 static int indexRead = 0;
 static int indexWrite = 0;
-static bool que[1048576] = { };
+static short que[1048576] = { };
 static float samplesToCollect = 0;
