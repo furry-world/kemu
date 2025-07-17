@@ -15,7 +15,7 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
     stream = LoadAudioStream(44100, 16, 1);
     SetAudioStreamCallback(stream, AudioInputCallback);
-    AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
+    // AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
 
     PlayAudioStream(stream);
 }
@@ -57,7 +57,7 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
             }
             samplesToCollect--;
         }
-        if (samplesCollected > 0) d[i] = short(MAX_SAMPLE_SIZE * (sum / samplesCollected) * 0.2);
+        if (samplesCollected > 0) d[i] = short(MAX_SAMPLE_SIZE * (sum / (float)(samplesCollected)) * 0.2);
         else d[i] = 0;
     }
 }
