@@ -18,7 +18,7 @@ int error;
 const float x_spacing = 19;
 const float y_spacing = 10;
 
-int main() {
+int main(int argc, char *argv[]) {
 
     Platform platform("kemu - Game N' Wave emulator", 600, 440, 60, 40);
 
@@ -33,6 +33,12 @@ int main() {
     CPU cpu;
 
     cpu.Reset(ram, rom, system, platform);
+
+    if (argc == 2)
+    {
+        rom.LoadFile(argv[1]);
+        if (isLocked) isLocked = false;
+    }
 
     GuiWindowFileDialogState fileDialogState = InitGuiWindowFileDialog(GetWorkingDirectory());
 

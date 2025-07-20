@@ -15,7 +15,7 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
     stream = LoadAudioStream(SAMPLE_RATE, BIT_DEPTH, 1);
     SetAudioStreamCallback(stream, AudioInputCallback);
-    // AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
+    AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
 
     sum = 0;
     samplesCollected = 0;
