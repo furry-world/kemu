@@ -39,6 +39,8 @@ struct CPU
     static constexpr uint8_t INS_SHIFTR = 0x11;
     static constexpr uint8_t INS_ILOAD = 0x12;
     static constexpr uint8_t INS_ISTORE = 0x13;
+    static constexpr uint8_t INS_NPLOAD = 0x14;
+    static constexpr uint8_t INS_NPSTORE = 0x15;
 
     uint8_t Note;
 

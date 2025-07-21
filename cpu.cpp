@@ -449,6 +449,51 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                 cyclesToExecute -= 2;
             } break;
 
+            case INS_NPLOAD:
+            {
+                uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
+
+                uint8_t address = value1 & 0b00000011;
+                address = (address << 6) + value2;
+
+                uint16_t finalAddr = CPU::FetchHyte(cyclesToExecute, ram, address);
+                finalAddr = (finalAddr << 6) + CPU::FetchHyte(cyclesToExecute, ram, address+1) & 0b0000111111111111;
+
+                if ((value1 & 0b00111000) >> 3 != 7)
+                {
+                     Registers[(value1 & 0b00111000) >> 3] = CPU::FetchHyte(cyclesToExecute, rom, finalAddr);
+                }
+                else
+                {
+                    Registers[(value1 & 0b00111000) >> 3] = CPU::FetchHyte(cyclesToExecute, rom, finalAddr) & 0b00000001;
+                }
+
+                if ((value1 & 0b00111000) >> 3 == 6)
+                {
+                    system.flag = 1;
+                }
+
+                cyclesToExecute--;
+            } break;
+
+            case INS_NPSTORE:
+            {
+                uint8_t value1 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
+                uint8_t value2 = CPU::FetchOpcodeHyte(cyclesToExecute, rom);
+
+                uint8_t address = value1 & 0b00000011;
+                address = (address << 6) + value2;
+
+                uint16_t finalAddr = CPU::FetchHyte(cyclesToExecute, ram, address);
+                finalAddr = (finalAddr << 6) + CPU::FetchHyte(cyclesToExecute, ram, address+1) & 0b0000111111111111;
+
+                if (rom.type == true) CPU::StoreHyte(cyclesToExecute, rom, finalAddr, Registers[(value1 & 0b00111000) >> 3]);
+                else cyclesToExecute--;
+
+                cyclesToExecute--;         
+            } break;
+
             default:
             {
                 if ((Ins & 0b00111000) >> 3 == 4)
@@ -459,7 +504,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                     uint16_t address = value1;
                     address = (address << 6) + value2;
 
-                    if (Registers[Ins & 0b00000111] != 7)
+                    if ((Ins & 0b00000111) != 7)
                     {
                         Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, address);
                     }
@@ -483,11 +528,10 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                     uint16_t address = value1;
                     address = (address << 6) + value2;
 
-                    printf("%u", address);
-
                     if (rom.type == true) CPU::StoreHyte(cyclesToExecute, rom, address, Registers[Ins & 0b00000111]);
+                    else cyclesToExecute--;
 
-                    cyclesToExecute -= 2;
+                    cyclesToExecute--;
                 }
                 else if ((Ins & 0b00111000) >> 3 == 6)
                 {
@@ -497,7 +541,7 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                     uint16_t address = value1;
                     address = (address << 6) + value2;
 
-                    if (Registers[Ins & 0b00000111] != 7)
+                    if ((Ins & 0b00000111) != 7)
                     {
                         Registers[Ins & 0b00000111] = CPU::FetchHyte(cyclesToExecute, rom, (address + Registers[2]) & 0b0000111111111111);
                     }
@@ -522,8 +566,9 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
                     address = (address << 6) + value2;
 
                     if (rom.type == true) CPU::StoreHyte(cyclesToExecute, rom, (address + Registers[2]) & 0b0000111111111111, Registers[Ins & 0b00000111]);
+                    else cyclesToExecute--;
 
-                    cyclesToExecute -= 3;
+                    cyclesToExecute -= 2;
                 }
                 else
                 {
@@ -926,6 +971,34 @@ std::string CPU::Disassemble (int InstructionCount, Memory& rom)
                 std::string strIns;
 
                 strIns = std::format("ISTORE {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+            } break;
+
+            case INS_NPLOAD:
+            {
+                uint8_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+
+                strIns = std::format("NPLOAD {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
+
+                str += strIns;
+
+                vPC += 3;
+            } break;
+
+            case INS_NPSTORE:
+            {
+                uint8_t value1 = rom[vPC+1];
+                uint8_t value2 = rom[vPC+2];
+
+                std::string strIns;
+
+                strIns = std::format("NPSTORE {} ${:X}\n", char(65 + (value1>>3)), ((value1 & 0b00000011) << 6) + value2);
 
                 str += strIns;
 
