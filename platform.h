@@ -11,7 +11,8 @@
 #define MAX_SAMPLES             512
 #define MAX_SAMPLES_PER_UPDATE  4096
 #define MAX_SAMPLE_SIZE         32767
-#define BUFFER_LENGTH	        4096
+#define BUFFER_LENGTH	        262144
+#define BUFFER_OFFSET	        1024
 
 #define SAMPLE_RATE             44100
 #define BIT_DEPTH               16
@@ -44,5 +45,6 @@ private:
 
 static int indexRead = 0;
 static int indexWrite = 0;
-static short que[1048576] = { };
+static short que[BUFFER_LENGTH] = { };
 static float samplesToCollect = 0;
+static int samplesToFabricate;

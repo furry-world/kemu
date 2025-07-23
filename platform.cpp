@@ -19,6 +19,7 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
 
     sum = 0;
     samplesCollected = 0;
+    samplesToFabricate = BUFFER_OFFSET;
 
     PlayAudioStream(stream);
 }
@@ -61,7 +62,14 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 
     for (unsigned int i = 0; i < frames; i++)
     {
+        if (samplesToFabricate > 0) {
+            d[i] = 0;
+            samplesToFabricate--;
+            continue;
+        }
+
         if (indexRead == indexWrite) {
+            samplesToFabricate += BUFFER_OFFSET;
             d[i] = 0;
             continue;
         }
