@@ -15,6 +15,7 @@ Platform::Platform(char const* title, int windowWidth, int windowHeight, int tex
     SetAudioStreamBufferSizeDefault(MAX_SAMPLES_PER_UPDATE);
     stream = LoadAudioStream(SAMPLE_RATE, BIT_DEPTH, 1);
     SetAudioStreamCallback(stream, AudioInputCallback);
+    AttachAudioStreamProcessor(stream, AudioProcessEffectHPF);
     AttachAudioStreamProcessor(stream, AudioProcessEffectLPF);
 
     sum = 0;
@@ -83,8 +84,8 @@ void Platform::AudioInputCallback(void *buffer, unsigned int frames)
 void Platform::AudioProcessEffectLPF(void *buffer, unsigned int frames)
 {
     static float low[2] = { 0.0f, 0.0f };
-    static const float cutoff = 2000.0f / SAMPLE_RATE;
-    const float k = cutoff / (cutoff + 0.1591549431f);
+    static const float cutoff = LPF_CUTOFF / SAMPLE_RATE;
+    const float k = cutoff / (cutoff + 1 / (2 * PI)); // RC filter formula
 
     float *bufferData = (float *)buffer;
     for (unsigned int i = 0; i < frames*2; i += 2)
@@ -96,6 +97,28 @@ void Platform::AudioProcessEffectLPF(void *buffer, unsigned int frames)
         low[1] += k * (r - low[1]);
         bufferData[i] = low[0];
         bufferData[i + 1] = low[1];
+    }
+}
+
+void Platform::AudioProcessEffectHPF(void *buffer, unsigned int frames)
+{
+    static float high[2] = { 0.0f, 0.0f };
+    static float old_in[2] = { 0.0f, 0.0f };
+    static const float cutoff = HPF_CUTOFF / SAMPLE_RATE;
+    const float k = 1 / (cutoff * TAU + 1); // RC filter formula
+
+    float *bufferData = (float *)buffer;
+    for (unsigned int i = 0; i < frames*2; i += 2)
+    {
+        const float l = bufferData[i];
+        const float r = bufferData[i + 1];
+
+        high[0] = k * (high[0] + l - old_in[0]);
+        high[1] = k * (high[1] + r - old_in[1]);
+        bufferData[i] = high[0];
+        bufferData[i + 1] = high[1];
+        old_in[0] = l;
+        old_in[1] = r;
     }
 }
 

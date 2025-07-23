@@ -19,6 +19,12 @@
 
 #define VOLUME_MULTIPLIER       0.2
 
+#define HPF_CUTOFF				500.0f
+#define LPF_CUTOFF				1500.0f
+
+
+#define TAU 6.2831853071
+
 class Platform
 {
 
@@ -32,6 +38,7 @@ private:
 
 	static void AudioInputCallback(void *buffer, unsigned int frames);
 	static void AudioProcessEffectLPF(void *buffer, unsigned int frames);
+	static void AudioProcessEffectHPF(void *buffer, unsigned int frames);
 
 	Image image;
 	Texture2D texture;
