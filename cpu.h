@@ -17,7 +17,7 @@ struct CPU
     float startCycles;
 
     uint8_t Registers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    uint8_t WordLen[20] = {3, 3, 2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3};
+    uint8_t WordLen[22] = {3, 3, 2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3};
 
     static constexpr uint8_t INS_CALL = 0x00;
     static constexpr uint8_t INS_JMP = 0x01;
