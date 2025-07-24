@@ -587,6 +587,10 @@ int CPU::Execute (float Cycles, Memory& rom, Memory& ram, System& system, Platfo
             {
                 interface.Add(0);
             }
+            else if (Note == 63)
+            {
+                interface.Add(1);
+            }
             else
             {
                 if (samplesGenerated >= system.GetSound(Note))
@@ -1138,7 +1142,7 @@ std::string CPU::NoteToString ()
         "E-6",
         "F-6",
         "F#6",
-        "G-6"
+        "ON"
     };
 
     return noteNames[Note];
