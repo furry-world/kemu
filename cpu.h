@@ -64,4 +64,6 @@ struct CPU
 
     std::string Disassemble (int InstructionCount, Memory&);
 
+    std::string NoteToString ();
+
 };
