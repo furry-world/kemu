@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
             system.Initialize();
 
             cpu.counter = 0;
-            
+
             cpu.NewNote = 0;
             cpu.Note = 0;
         }
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
             DrawTextEx(font, cpu.Disassemble(10, rom).c_str(), (Vector2) {925, 100}, 16, 0, DARKGRAY);
 
             char states[256];
-            sprintf(states, "PC: %02X\nSP: %02o\nA: %02o\nB: %02o\nC: %02o\nD: %02o\nE: %02o\nF: %02o\nG: %02o\nH: %02o\nNote: %02o\nInput: %02o\nTimer: %02o", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, ram[239], ram[238]);
+            sprintf(states, "PC: %02X\nSP: %02o\nA: %02o\nB: %02o\nC: %02o\nD: %02o\nE: %02o\nF: %02o\nG: %02o\nH: %02o\nNote: %02o %s\nInput: %02o\nTimer: %02o", cpu.PC, cpu.SP, cpu.Registers[0], cpu.Registers[1], cpu.Registers[2], cpu.Registers[3], cpu.Registers[4], cpu.Registers[5], cpu.Registers[6], cpu.Registers[7], cpu.Note, cpu.NoteToString().c_str(), ram[239], ram[238]);
             DrawTextEx(font, states, (Vector2) {610, 40}, 16, 0, DARKGRAY);
 
             if (GuiButton((Rectangle) {1000, 600, 150, 40}, "Slice 1")) currentSelection = 0;
